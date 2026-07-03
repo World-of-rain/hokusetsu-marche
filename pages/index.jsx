@@ -1,5 +1,5 @@
 /**
- * pages/index.jsx  ─  豊中駅前 特売ダッシュボード
+ * pages/index.jsx  ─  豊南マルシェ~庄内特売ダッシュボード~
  */
 
 import { useState, useMemo } from "react";
