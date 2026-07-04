@@ -1,13 +1,7 @@
-/**
- * pages/index.jsx  ─  豊南マルシェ~庄内特売ダッシュボード~
- */
-
 import { useState, useMemo } from "react";
+import Head from "next/head";
 import { fetchSaleData } from "../lib/db";
 
-// ================================================================
-// サンプルデータ (API取得失敗時のフォールバック)
-// ================================================================
 const SAMPLE_DATA = {
   lastUpdated: "取得失敗",
   daily: [],
@@ -16,9 +10,6 @@ const SAMPLE_DATA = {
   general: [],
 };
 
-// ================================================================
-// NativeAd: インフィード広告コンポーネント
-// ================================================================
 function NativeAd({ title, description, imgUrl }) {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden relative flex p-3 gap-3 my-4">
@@ -34,9 +25,6 @@ function NativeAd({ title, description, imgUrl }) {
   );
 }
 
-// ================================================================
-// DailyCarouselItem: 1品目のカルーセル行 + アドバイスボックス
-// ================================================================
 function DailyCarouselItem({ item }) {
   const todaySlot    = item.schedule.find(s => s.day.includes("今日"));
   const tomorrowSlot = item.schedule.find(s => s.day.includes("明日"));
@@ -92,9 +80,6 @@ function DailyCarouselItem({ item }) {
   );
 }
 
-// ================================================================
-// StockAccordion: 排他制御アコーディオン
-// ================================================================
 function StockAccordion({ stocks, openIdx, onToggle }) {
   return (
     <section>
@@ -125,8 +110,8 @@ function StockAccordion({ stocks, openIdx, onToggle }) {
 
               <div
                 style={{
-                  maxHeight: isOpen ? "500px" : "0px",
-                  overflow: "hidden",
+                  maxHeight: isOpen ? "70vh" : "0px",
+                  overflowY: "auto",
                   transition: "max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                 }}
               >
@@ -153,9 +138,6 @@ function StockAccordion({ stocks, openIdx, onToggle }) {
   );
 }
 
-// ================================================================
-// HighlightCard: 目玉商品カード（画像付き）
-// ================================================================
 function HighlightCard({ h }) {
   return (
     <div className="bg-white p-3.5 rounded-2xl shadow-sm border border-orange-100 relative overflow-hidden flex gap-3">
@@ -171,7 +153,7 @@ function HighlightCard({ h }) {
           </span>
         </div>
         <div className="text-[11px] text-stone-500 mt-1.5 leading-relaxed">
-          過去の平均価格より大幅にお得！見逃し厳禁の特売品です。
+          {h.comment || "過去の平均価格より大幅にお得！見逃し厳禁の特売品です。"}
         </div>
         <div className="text-right mt-2.5 pt-2 border-t border-dashed border-stone-200">
           <span className="text-stone-400 text-[10px]">({h.shop})</span>
@@ -182,13 +164,9 @@ function HighlightCard({ h }) {
   );
 }
 
-// ================================================================
-// GeneralTable: 検索・ソート対応テーブル
-// ================================================================
-function GeneralTable({ items, searchQuery, setSearchQuery, sortKey, setSortKey, currentTab }) {
+function GeneralTable({ items, searchQuery, setSearchQuery, sortKey, setSortKey, currentTab, storeFilter, setStoreFilter, availableStores }) {
   return (
     <section className="bg-white rounded-3xl shadow-sm border border-stone-100 overflow-hidden relative">
-      {/* 背景テクスチャ装飾 */}
       <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '16px 16px' }}></div>
       
       <div className="p-4 border-b border-stone-100 bg-[#faf9f8] space-y-3 relative z-10">
@@ -211,6 +189,29 @@ function GeneralTable({ items, searchQuery, setSearchQuery, sortKey, setSortKey,
             <option value="price">価格が安い順</option>
             <option value="shop">お店の順</option>
           </select>
+        </div>
+        
+        {/* 店舗スライサー */}
+        <div className="flex gap-1.5 overflow-x-auto no-sb pb-0.5">
+          <button
+            onClick={() => setStoreFilter("all")}
+            className={`flex-shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition-colors ${
+              storeFilter === "all" ? "bg-rose-500 text-white" : "bg-stone-100 text-stone-500"
+            }`}
+          >
+            すべての店舗
+          </button>
+          {availableStores.map(store => (
+            <button
+              key={store}
+              onClick={() => setStoreFilter(store)}
+              className={`flex-shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition-colors ${
+                storeFilter === store ? "bg-rose-500 text-white" : "bg-stone-100 text-stone-500"
+              }`}
+            >
+              {store}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -257,14 +258,12 @@ function GeneralTable({ items, searchQuery, setSearchQuery, sortKey, setSortKey,
   );
 }
 
-// ================================================================
-// Dashboard: メインコンポーネント
-// ================================================================
 export default function Dashboard({ data }) {
   const [currentTab,    setCurrentTab]    = useState("today");
   const [sortKey,       setSortKey]       = useState("price");
   const [searchQuery,   setSearchQuery]   = useState("");
   const [openAccordion, setOpenAccordion] = useState(null);
+  const [storeFilter,   setStoreFilter]   = useState("all");
 
   const toggleAccordion = idx =>
     setOpenAccordion(prev => (prev === idx ? null : idx));
@@ -274,16 +273,22 @@ export default function Dashboard({ data }) {
     [data.highlights, currentTab]
   );
 
+  const availableStores = useMemo(
+    () => [...new Set(data.general.map(item => item.shop))].sort((a, b) => a.localeCompare(b, "ja")),
+    [data.general]
+  );
+
   const filteredGeneral = useMemo(() => {
     return [...data.general]
       .filter(item => item.day === currentTab)
+      .filter(item => storeFilter === "all" || item.shop === storeFilter)
       .filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
       .sort((a, b) =>
         sortKey === "price"
           ? a.price - b.price
           : a.shop.localeCompare(b.shop, "ja")
       );
-  }, [data.general, currentTab, searchQuery, sortKey]);
+  }, [data.general, currentTab, storeFilter, searchQuery, sortKey]);
 
   const tabCls = active =>
     `flex-1 py-3.5 font-bold rounded-2xl text-center text-[13px] transition-all duration-200 ${
@@ -292,29 +297,27 @@ export default function Dashboard({ data }) {
         : "bg-stone-100 text-stone-500 hover:bg-stone-200"
     }`;
 
-  // APIのstocksデータをアコーディオン用の形式に変換
   const formattedStocks = useMemo(() => {
-    const items = data.stocks.map(s => {
+    const groups = {};
+    data.stocks.forEach(s => {
       const minSlot = s.schedule.find(slot => slot.isMin) || s.schedule.find(slot => slot.price > 0);
-      return {
-        name: s.name,
-        price: minSlot ? minSlot.price : 0,
-        shop: minSlot ? minSlot.shop : "-"
-      };
-    }).filter(item => item.price > 0);
-
-    return [
-      { cat: "今週のストック推奨品", items: items }
-    ];
+      if (!minSlot) return;
+      const label = s.category_label || "その他ストック";
+      if (!groups[label]) groups[label] = [];
+      groups[label].push({ name: s.name, price: minSlot.price, shop: minSlot.shop });
+    });
+    return Object.entries(groups).map(([cat, items]) => ({ cat, items }));
   }, [data.stocks]);
 
   return (
     <div className="bg-[#f5f4f1] font-sans antialiased text-stone-800 min-h-screen">
+      <Head>
+        <title>北摂マルシェ 〜豊南エリア特売情報〜</title>
+      </Head>
       <style>{`.no-sb::-webkit-scrollbar{display:none}.no-sb{-ms-overflow-style:none;scrollbar-width:none}`}</style>
 
       <div className="max-w-md mx-auto bg-[#faf9f8] min-h-screen pb-12 shadow-xl relative">
 
-        {/* ── ヒーロー画像 ── */}
         <div className="h-48 w-full relative">
           <img 
             src="https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=800&auto=format&fit=crop" 
@@ -324,16 +327,18 @@ export default function Dashboard({ data }) {
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-stone-900/20 to-[#faf9f8]"></div>
         </div>
 
-        {/* ── ヘッダー ── */}
         <header className="bg-white/70 backdrop-blur-xl border-b border-stone-200 sticky top-0 z-50 p-4 pb-3 pt-4 -mt-16 rounded-t-3xl">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center mb-2">
             <h1 className="text-base font-black text-stone-800 tracking-tight drop-shadow-sm">
-              🛍️ 豊中駅前 特売ダッシュボード
+              🛒 北摂マルシェ
             </h1>
             <span className="text-[10px] bg-white/80 text-stone-600 px-2.5 py-1 rounded-full font-bold shadow-sm border border-stone-100">
               本日 {data.lastUpdated} 更新
             </span>
           </div>
+          <p className="text-[10px] text-stone-500 mb-4 font-medium leading-relaxed">
+            豊南エリアのスーパー（ライフ・ダイエー・サタケ・万代など）のチラシ情報をAIが毎日集約！いつ・どこで買うのが一番お得か、一目でわかります。
+          </p>
           <div className="flex gap-2.5 bg-stone-100/50 p-1 rounded-3xl">
             <button onClick={() => setCurrentTab("today")}    className={tabCls(currentTab === "today")}>
               今日買うもの
@@ -346,7 +351,6 @@ export default function Dashboard({ data }) {
 
         <main className="p-4 space-y-6">
 
-          {/* 1. 日常インフラ */}
           <section className="bg-white p-4 rounded-3xl shadow-sm border border-stone-100">
             <h2 className="text-[11px] font-bold text-stone-500 tracking-wider mb-4 flex items-center gap-1">
               <span>🥛</span> 毎日の必需品 1週間底値カレンダー
@@ -360,21 +364,18 @@ export default function Dashboard({ data }) {
             </div>
           </section>
 
-          {/* インフィード広告 ① */}
           <NativeAd 
             title="【PR】豊中駅前の家事代行サービス" 
             description="お買い物からお料理まで。初回お試しキャンペーン実施中！"
             imgUrl="https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=200&q=80"
           />
 
-          {/* 2. ストック */}
           <StockAccordion
             stocks={formattedStocks}
             openIdx={openAccordion}
             onToggle={toggleAccordion}
           />
 
-          {/* 3. 注目枠（タブ連動） */}
           <section className="bg-gradient-to-br from-amber-50 to-orange-50/50 p-4 rounded-3xl border border-orange-100 shadow-sm">
             <h2 className="text-[11px] font-bold text-orange-600 tracking-wider mb-3 flex items-center gap-1">
               <span>🔥</span> 見落とし厳禁！エリア最高目玉品
@@ -391,7 +392,6 @@ export default function Dashboard({ data }) {
             </div>
           </section>
 
-          {/* 4. 一般テーブル */}
           <GeneralTable
             items={filteredGeneral}
             searchQuery={searchQuery}
@@ -399,14 +399,24 @@ export default function Dashboard({ data }) {
             sortKey={sortKey}
             setSortKey={setSortKey}
             currentTab={currentTab}
+            storeFilter={storeFilter}
+            setStoreFilter={setStoreFilter}
+            availableStores={availableStores}
           />
 
-          {/* インフィード広告 ② */}
           <NativeAd 
             title="【PR】お得なクレジットカード" 
             description="スーパーでの買い物が常にポイント2倍！今なら5000ptプレゼント"
             imgUrl="https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=200&q=80"
           />
+
+          {/* 対象スーパーリスト */}
+          <div className="text-center pt-4 pb-2">
+            <p className="text-[10px] text-stone-400 font-medium">
+              【データ取得対象スーパー】<br/>
+              ライフ 庄内店 / ダイエー 豊中店 / サタケ 豊南店 / 万代 豊中豊南店 / サンディ 庄内栄町店 / ジャパン 豊中庄内店 / スギ薬局 豊中庄内店
+            </p>
+          </div>
 
         </main>
       </div>
@@ -414,9 +424,6 @@ export default function Dashboard({ data }) {
   );
 }
 
-// ================================================================
-// getStaticProps: ビルド時にAPIからデータを取得
-// ================================================================
 export async function getStaticProps() {
   const data = await fetchSaleData();
   
