@@ -45,7 +45,10 @@ function DailyCarouselItem({ item }) {
     <div className="border-b border-stone-100 last:border-0 pb-4 last:pb-0">
       <div className="text-[13px] font-bold text-stone-700 mb-2 flex items-center gap-2">
         <img src={item.image} alt={item.name} className="w-6 h-6 rounded-full object-cover shadow-sm" />
-        <span>{item.name}</span>
+        <div className="flex items-center flex-wrap gap-1">
+          <span>{item.name}</span>
+          {item.is_new && <span className="bg-amber-400 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">NEW</span>}
+        </div>
       </div>
 
       <div className="flex gap-2.5 overflow-x-auto py-1 no-sb">
@@ -121,7 +124,10 @@ function StockAccordion({ stocks, openIdx, onToggle }) {
                       key={j}
                       className="flex justify-between items-center py-2 border-b border-stone-100 last:border-0"
                     >
-                      <span className="font-medium text-stone-600 mr-2">{item.name}</span>
+                      <div className="flex items-center flex-wrap gap-1 mr-2">
+                        <span className="font-medium text-stone-600">{item.name}</span>
+                        {item.is_new && <span className="bg-amber-400 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">NEW</span>}
+                      </div>
                       <span className="flex-shrink-0">
                         <strong className="text-rose-600 font-black text-[13px]">{item.price}円</strong>
                         <span className="text-stone-400 text-[10px] ml-1">({item.shop})</span>
@@ -147,7 +153,10 @@ function HighlightCard({ h }) {
       
       <div className="flex-1">
         <div className="flex justify-between items-start">
-          <span className="font-black text-[13px] text-stone-800 leading-tight">{h.name}</span>
+          <div className="flex items-center flex-wrap gap-1">
+            <span className="font-black text-[13px] text-stone-800 leading-tight">{h.name}</span>
+            {h.is_new && <span className="bg-amber-400 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">NEW</span>}
+          </div>
           <span className="flex-shrink-0 ml-2 text-[10px] bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-bold">
             {h.day === "today" ? "今日限定" : "明日限定"}
           </span>
@@ -164,7 +173,7 @@ function HighlightCard({ h }) {
   );
 }
 
-function GeneralTable({ items, searchQuery, setSearchQuery, sortKey, setSortKey, currentTab, storeFilter, setStoreFilter, availableStores }) {
+function GeneralTable({ items, searchQuery, setSearchQuery, sortKey, setSortKey, currentTab, storeFilter, setStoreFilter, availableStores, categoryFilter, setCategoryFilter, availableCategories, onlyOneDay, setOnlyOneDay }) {
   return (
     <section className="bg-white rounded-3xl shadow-sm border border-stone-100 overflow-hidden relative">
       <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '16px 16px' }}></div>
@@ -188,30 +197,64 @@ function GeneralTable({ items, searchQuery, setSearchQuery, sortKey, setSortKey,
           >
             <option value="price">価格が安い順</option>
             <option value="shop">お店の順</option>
+            <option value="category">ジャンル順</option>
           </select>
         </div>
         
-        {/* 店舗スライサー */}
-        <div className="flex gap-1.5 overflow-x-auto no-sb pb-0.5">
-          <button
-            onClick={() => setStoreFilter("all")}
-            className={`flex-shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition-colors ${
-              storeFilter === "all" ? "bg-rose-500 text-white" : "bg-stone-100 text-stone-500"
-            }`}
-          >
-            すべての店舗
-          </button>
-          {availableStores.map(store => (
+        <div className="flex flex-col gap-2 overflow-x-auto no-sb pb-1">
+          {/* 店舗フィルター */}
+          <div className="flex gap-1.5">
             <button
-              key={store}
-              onClick={() => setStoreFilter(store)}
+              onClick={() => setStoreFilter("all")}
               className={`flex-shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition-colors ${
-                storeFilter === store ? "bg-rose-500 text-white" : "bg-stone-100 text-stone-500"
+                storeFilter === "all" ? "bg-rose-500 text-white" : "bg-stone-100 text-stone-500"
               }`}
             >
-              {store}
+              すべての店舗
             </button>
-          ))}
+            {availableStores.map(store => (
+              <button
+                key={store}
+                onClick={() => setStoreFilter(store)}
+                className={`flex-shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition-colors ${
+                  storeFilter === store ? "bg-rose-500 text-white" : "bg-stone-100 text-stone-500"
+                }`}
+              >
+                {store}
+              </button>
+            ))}
+          </div>
+          {/* カテゴリフィルター & 本日のみ */}
+          <div className="flex gap-1.5 items-center">
+            <button
+              onClick={() => setCategoryFilter("all")}
+              className={`flex-shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition-colors ${
+                categoryFilter === "all" ? "bg-rose-500 text-white" : "bg-stone-100 text-stone-500"
+              }`}
+            >
+              すべてのジャンル
+            </button>
+            {availableCategories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setCategoryFilter(cat)}
+                className={`flex-shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition-colors ${
+                  categoryFilter === cat ? "bg-rose-500 text-white" : "bg-stone-100 text-stone-500"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+            <div className="w-px h-4 bg-stone-300 mx-1"></div>
+            <button 
+              onClick={() => setOnlyOneDay(!onlyOneDay)}
+              className={`flex-shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition-colors border ${
+                onlyOneDay ? "bg-teal-500 text-white border-teal-500" : "bg-white text-teal-600 border-teal-200"
+              }`}
+            >
+              {onlyOneDay ? "✓ 本日のみ" : "本日のみ"}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -233,9 +276,13 @@ function GeneralTable({ items, searchQuery, setSearchQuery, sortKey, setSortKey,
               </tr>
             ) : (
               items.map((item, i) => (
-                <tr key={i} className="hover:bg-rose-50/30 transition-colors bg-white">
+                <tr key={i} className="hover:bg-rose-50/30 transition-colors bg-white even:bg-stone-50/50">
                   <td className="p-3 pl-4 text-xs">
-                    <div className="font-bold text-stone-700">{item.name}</div>
+                    <div className="flex items-center flex-wrap gap-1">
+                      <span className="font-bold text-stone-700">{item.name}</span>
+                      {item.is_new && <span className="bg-amber-400 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">NEW</span>}
+                      {item.is_one_day_sale && <span className="bg-teal-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">本日限り</span>}
+                    </div>
                     {item.warning && currentTab === "today" && (
                       <span className="inline-block mt-1 text-[10px] bg-rose-100 text-rose-700 font-bold px-2 py-0.5 rounded-full animate-pulse">
                         🛑 明日まで待って！
@@ -264,6 +311,8 @@ export default function Dashboard({ data }) {
   const [searchQuery,   setSearchQuery]   = useState("");
   const [openAccordion, setOpenAccordion] = useState(null);
   const [storeFilter,   setStoreFilter]   = useState("all");
+  const [categoryFilter,setCategoryFilter]= useState("all");
+  const [onlyOneDay,    setOnlyOneDay]    = useState(false);
 
   const toggleAccordion = idx =>
     setOpenAccordion(prev => (prev === idx ? null : idx));
@@ -278,17 +327,25 @@ export default function Dashboard({ data }) {
     [data.general]
   );
 
+  const availableCategories = useMemo(
+    () => [...new Set(data.general.map(item => item.category).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ja")),
+    [data.general]
+  );
+
   const filteredGeneral = useMemo(() => {
     return [...data.general]
       .filter(item => item.day === currentTab)
       .filter(item => storeFilter === "all" || item.shop === storeFilter)
+      .filter(item => categoryFilter === "all" || item.category === categoryFilter)
+      .filter(item => !onlyOneDay || item.is_one_day_sale)
       .filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
-      .sort((a, b) =>
-        sortKey === "price"
-          ? a.price - b.price
-          : a.shop.localeCompare(b.shop, "ja")
-      );
-  }, [data.general, currentTab, storeFilter, searchQuery, sortKey]);
+      .sort((a, b) => {
+        if (sortKey === "price") return a.price - b.price;
+        if (sortKey === "shop") return a.shop.localeCompare(b.shop, "ja");
+        if (sortKey === "category") return (a.category || "").localeCompare(b.category || "", "ja");
+        return 0;
+      });
+  }, [data.general, currentTab, storeFilter, categoryFilter, onlyOneDay, searchQuery, sortKey]);
 
   const tabCls = active =>
     `flex-1 py-3.5 font-bold rounded-2xl text-center text-[13px] transition-all duration-200 ${
@@ -304,10 +361,18 @@ export default function Dashboard({ data }) {
       if (!minSlot) return;
       const label = s.category_label || "その他ストック";
       if (!groups[label]) groups[label] = [];
-      groups[label].push({ name: s.name, price: minSlot.price, shop: minSlot.shop });
+      groups[label].push({ name: s.name, price: minSlot.price, shop: minSlot.shop, is_new: s.is_new });
     });
     return Object.entries(groups).map(([cat, items]) => ({ cat, items }));
   }, [data.stocks]);
+
+  // 日付の計算
+  const todayDate = new Date();
+  const tomorrowDate = new Date(todayDate);
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+  const formatDate = (d) => `${d.getMonth() + 1}/${d.getDate()}`;
+  const todayStr = formatDate(todayDate);
+  const tomorrowStr = formatDate(tomorrowDate);
 
   return (
     <div className="bg-[#f5f4f1] font-sans antialiased text-stone-800 min-h-screen">
@@ -341,10 +406,10 @@ export default function Dashboard({ data }) {
           </p>
           <div className="flex gap-2.5 bg-stone-100/50 p-1 rounded-3xl">
             <button onClick={() => setCurrentTab("today")}    className={tabCls(currentTab === "today")}>
-              今日買うもの
+              今日({todayStr})の特売品
             </button>
             <button onClick={() => setCurrentTab("tomorrow")} className={tabCls(currentTab === "tomorrow")}>
-              明日まで待つもの
+              明日({tomorrowStr})の特売品
             </button>
           </div>
         </header>
@@ -402,6 +467,11 @@ export default function Dashboard({ data }) {
             storeFilter={storeFilter}
             setStoreFilter={setStoreFilter}
             availableStores={availableStores}
+            categoryFilter={categoryFilter}
+            setCategoryFilter={setCategoryFilter}
+            availableCategories={availableCategories}
+            onlyOneDay={onlyOneDay}
+            setOnlyOneDay={setOnlyOneDay}
           />
 
           <NativeAd 
@@ -410,12 +480,17 @@ export default function Dashboard({ data }) {
             imgUrl="https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=200&q=80"
           />
 
-          {/* 対象スーパーリスト */}
           <div className="text-center pt-4 pb-2">
-            <p className="text-[10px] text-stone-400 font-medium">
-              【データ取得対象スーパー】<br/>
-              ライフ 庄内店 / ダイエー 豊中店 / サタケ 豊南店 / 万代 豊中豊南店 / サンディ 庄内栄町店 / ジャパン 豊中庄内店 / スギ薬局 豊中庄内店
-            </p>
+            <p className="text-[11px] text-stone-500 font-bold mb-2">【データ取得対象スーパー】</p>
+            <div className="flex flex-wrap justify-center gap-2 text-[10px]">
+              <a href="https://tokubai.co.jp/%E3%83%A9%E3%82%A4%E3%83%95/7345" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">ライフ 庄内店</a>
+              <a href="https://tokubai.co.jp/%E3%83%80%E3%82%A4%E3%82%A8%E3%83%BC/10014" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">ダイエー 豊中店</a>
+              <a href="https://satake-takenoko.co.jp/flyer/index.html" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">サタケ 豊南店</a>
+              <a href="https://tokubai.co.jp/%E4%B8%87%E4%BB%A3/14011" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">万代 豊中豊南店</a>
+              <a href="https://tokubai.co.jp/%E3%82%B5%E3%83%B3%E3%83%87%E3%82%A3/14012" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">サンディ 庄内栄町店</a>
+              <a href="https://tokubai.co.jp/%E3%82%B8%E3%83%A3%E3%83%91%E3%83%B3/14013" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">ジャパン 豊中庄内店</a>
+              <a href="https://tokubai.co.jp/%E3%82%B9%E3%82%AE%E8%96%AC%E5%B1%80/14014" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">スギ薬局 豊中庄内店</a>
+            </div>
           </div>
 
         </main>
