@@ -499,12 +499,19 @@ export default function Dashboard({ data }) {
   );
 }
 
+// --- pages/index.jsx の一番下 ---
+
 export async function getStaticProps() {
   const data = await fetchSaleData();
   
+  // 本番ビルド時にデータ取得に失敗した場合は、意図的にエラーを投げてビルドを失敗させる
+  if (!data && process.env.NODE_ENV === 'production') {
+    throw new Error("Failed to fetch sale data during production build. Aborting to keep the previous successful deployment.");
+  }
+
   return {
     props: {
-      data: data || SAMPLE_DATA,
+      data: data || SAMPLE_DATA, // ローカル開発時(npm run dev)はSAMPLE_DATAにフォールバック
     },
   };
 }
