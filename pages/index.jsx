@@ -227,9 +227,9 @@ function GeneralTable({ items, searchQuery, setSearchQuery, sortKey, setSortKey,
           </select>
         </div>
         
-        <div className="flex flex-col gap-2 overflow-x-auto no-sb pb-1">
-          {/* 店舗フィルター */}
-          <div className="flex gap-1.5">
+        <div className="flex flex-col gap-2 pb-1">
+          {/* 店舗フィルター（横スクロールをこの行だけに適用） */}
+          <div className="flex gap-1.5 overflow-x-auto no-sb pb-1">
             <button
               onClick={() => setStoreFilter("all")}
               className={`flex-shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition-colors ${
@@ -250,8 +250,8 @@ function GeneralTable({ items, searchQuery, setSearchQuery, sortKey, setSortKey,
               </button>
             ))}
           </div>
-          {/* カテゴリフィルター & 本日のみ */}
-          <div className="flex gap-1.5 items-center">
+          {/* カテゴリフィルター & 本日のみ（横スクロールをこの行だけに適用） */}
+          <div className="flex gap-1.5 items-center overflow-x-auto no-sb pb-1">
             <button
               onClick={() => setCategoryFilter("all")}
               className={`flex-shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition-colors ${
@@ -271,7 +271,7 @@ function GeneralTable({ items, searchQuery, setSearchQuery, sortKey, setSortKey,
                 {cat}
               </button>
             ))}
-            <div className="w-px h-4 bg-stone-300 mx-1"></div>
+            <div className="w-px h-4 bg-stone-300 mx-1 flex-shrink-0"></div>
             <button 
               onClick={() => setOnlyOneDay(!onlyOneDay)}
               className={`flex-shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition-colors border ${
@@ -460,8 +460,8 @@ export default function Dashboard({ data }) {
             onToggle={toggleAccordion}
           />
 
-          {/* タブをここに移動 */}
-          <div className="flex gap-2.5 bg-stone-100/50 p-1 rounded-3xl sticky top-[100px] z-40 backdrop-blur-md">
+          {/* タブ（固定を解除して自然な配置に） */}
+          <div className="flex gap-2.5 bg-stone-100/50 p-1 rounded-3xl">
             <button onClick={() => setCurrentTab("today")}    className={tabCls(currentTab === "today")}>
               今日({todayStr})の特売品
             </button>
