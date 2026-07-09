@@ -10,13 +10,36 @@ const SAMPLE_DATA = {
   general: [],
 };
 
+// 画像が読み込めなかった場合に頭文字を表示するフォールバックコンポーネント
+function FallbackImage({ src, alt, className }) {
+  const [error, setError] = useState(false);
+  
+  if (error || !src) {
+    const initial = alt ? alt.charAt(0) : "🛒";
+    return (
+      <div className={`flex items-center justify-center bg-stone-200 text-stone-500 font-bold ${className}`}>
+        {initial}
+      </div>
+    );
+  }
+
+  return (
+    <img 
+      src={src} 
+      alt={alt} 
+      className={className} 
+      onError={() => setError(true)} 
+    />
+  );
+}
+
 function NativeAd({ title, description, imgUrl }) {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden relative flex p-3 gap-3 my-4">
       <span className="absolute top-0 right-0 bg-stone-200 text-stone-500 text-[9px] px-1.5 py-0.5 rounded-bl-lg font-bold z-10">
         スポンサーリンク
       </span>
-      <img src={imgUrl} alt="ad" className="w-16 h-16 object-cover rounded-xl flex-shrink-0" />
+      <FallbackImage src={imgUrl} alt="ad" className="w-16 h-16 object-cover rounded-xl flex-shrink-0" />
       <div className="flex-1 pt-1">
         <h3 className="text-xs font-black text-stone-700 leading-tight">{title}</h3>
         <p className="text-[10px] text-stone-500 mt-1.5 line-clamp-2 leading-relaxed">{description}</p>
@@ -44,7 +67,7 @@ function DailyCarouselItem({ item }) {
   return (
     <div className="border-b border-stone-100 last:border-0 pb-4 last:pb-0">
       <div className="text-[13px] font-bold text-stone-700 mb-2 flex items-center gap-2">
-        <img src={item.image} alt={item.name} className="w-6 h-6 rounded-full object-cover shadow-sm" />
+        <FallbackImage src={item.image} alt={item.name} className="w-6 h-6 rounded-full object-cover shadow-sm" />
         <div className="flex items-center flex-wrap gap-1">
           <span>{item.name}</span>
           {item.is_new && <span className="bg-amber-400 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">NEW</span>}
@@ -90,15 +113,15 @@ function StockAccordion({ stocks, openIdx, onToggle }) {
       <h2 className="text-[11px] font-bold text-stone-500 tracking-wider mb-2 px-1 flex items-center gap-1">
         <span>🥫</span> ストック・まとめ買いのチャンス
       </h2>
-      <div className="space-y-2.5">
+      <div className="space-y-1.5">
         {stocks.map((s, i) => {
           const hasItem = s.items.length > 0;
           const isOpen  = openIdx === i;
           return (
-            <div key={i} className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden">
+            <div key={i} className="bg-white rounded-xl shadow-sm border border-stone-100 overflow-hidden">
               <button
                 onClick={() => hasItem && onToggle(i)}
-                className={`w-full p-3.5 flex justify-between items-center text-xs transition-colors ${
+                className={`w-full p-2.5 flex justify-between items-center text-xs transition-colors ${
                   hasItem ? "cursor-pointer hover:bg-stone-50 active:bg-stone-100" : "opacity-50 cursor-not-allowed"
                 }`}
               >
@@ -119,20 +142,20 @@ function StockAccordion({ stocks, openIdx, onToggle }) {
                   transition: "max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                 }}
               >
-                <div className="px-4 pb-3 pt-2 text-xs border-t border-stone-50 bg-[#faf9f8]">
+                <div className="px-3 pb-2 pt-1 text-[11px] border-t border-stone-50 bg-[#faf9f8]">
                   {s.items.map((item, j) => (
                     <div
                       key={j}
-                      className="flex justify-between items-center py-2 border-b border-stone-100 last:border-0"
+                      className="flex justify-between items-center py-1.5 border-b border-stone-100 last:border-0"
                     >
                       <div className="flex items-center flex-wrap gap-1 mr-2">
                         <span className="font-medium text-stone-600">{item.name}</span>
                         {item.is_new && <span className="bg-amber-400 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">NEW</span>}
-                        {item.sale_end_date && <span className="text-stone-400 text-[10px] font-medium ml-1">{item.sale_end_date}</span>}
+                        {item.sale_end_date && <span className="text-stone-400 text-[9px] font-medium ml-1">{item.sale_end_date}</span>}
                       </div>
                       <span className="flex-shrink-0">
                         <strong className="text-rose-600 font-black text-[13px]">{item.price}円</strong>
-                        <span className="text-stone-400 text-[10px] ml-1">({item.shop})</span>
+                        <span className="text-stone-400 text-[9px] ml-1">({item.shop})</span>
                       </span>
                     </div>
                   ))}
@@ -148,28 +171,28 @@ function StockAccordion({ stocks, openIdx, onToggle }) {
 
 function HighlightCard({ h }) {
   return (
-    <div className="bg-white p-3.5 rounded-2xl shadow-sm border border-orange-100 relative overflow-hidden flex gap-3">
-      <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-orange-400 to-rose-400"></div>
+    <div className="bg-white p-2.5 rounded-2xl shadow-sm border border-orange-100 relative overflow-hidden flex gap-2.5">
+      <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-orange-400 to-rose-400"></div>
       
-      <img src={h.image} alt={h.name} className="w-16 h-16 object-cover rounded-xl flex-shrink-0 ml-1 shadow-sm" />
+      <FallbackImage src={h.image} alt={h.name} className="w-12 h-12 object-cover rounded-xl flex-shrink-0 ml-1 shadow-sm text-lg" />
       
       <div className="flex-1">
         <div className="flex justify-between items-start">
           <div className="flex items-center flex-wrap gap-1">
-            <span className="font-black text-[13px] text-stone-800 leading-tight">{h.name}</span>
-            {h.is_new && <span className="bg-amber-400 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">NEW</span>}
-            {!h.is_one_day_sale && h.sale_end_date && <span className="text-stone-400 text-[10px] font-medium ml-1">{h.sale_end_date}</span>}
+            <span className="font-black text-xs text-stone-800 leading-tight">{h.name}</span>
+            {h.is_new && <span className="bg-amber-400 text-white text-[8px] px-1 py-0.5 rounded-full font-bold">NEW</span>}
+            {!h.is_one_day_sale && h.sale_end_date && <span className="text-stone-400 text-[9px] font-medium ml-1">{h.sale_end_date}</span>}
           </div>
-          <span className="flex-shrink-0 ml-2 text-[10px] bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-bold">
+          <span className="flex-shrink-0 ml-1 text-[9px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded-full font-bold">
             {h.day === "today" ? "今日限定" : "明日限定"}
           </span>
         </div>
-        <div className="text-[11px] text-stone-500 mt-1.5 leading-relaxed">
+        <div className="text-[10px] text-stone-500 mt-1 leading-relaxed">
           {h.comment || "過去の平均価格より大幅にお得！見逃し厳禁の特売品です。"}
         </div>
-        <div className="text-right mt-2.5 pt-2 border-t border-dashed border-stone-200">
-          <span className="text-stone-400 text-[10px]">({h.shop})</span>
-          <span className="text-lg font-black text-rose-600 ml-1.5 tracking-tight">{h.price}円</span>
+        <div className="text-right mt-1.5 pt-1.5 border-t border-dashed border-stone-200">
+          <span className="text-stone-400 text-[9px]">({h.shop})</span>
+          <span className="text-base font-black text-rose-600 ml-1 tracking-tight">{h.price}円</span>
         </div>
       </div>
     </div>
@@ -388,7 +411,7 @@ export default function Dashboard({ data }) {
       <div className="max-w-md mx-auto bg-[#faf9f8] min-h-screen pb-12 shadow-xl relative">
 
         <div className="h-48 w-full relative">
-          <img 
+          <FallbackImage 
             src="https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=800&auto=format&fit=crop" 
             alt="Supermarket" 
             className="w-full h-full object-cover"
@@ -405,17 +428,9 @@ export default function Dashboard({ data }) {
               本日 {data.lastUpdated} 更新
             </span>
           </div>
-          <p className="text-[10px] text-stone-500 mb-4 font-medium leading-relaxed">
+          <p className="text-[10px] text-stone-500 font-medium leading-relaxed">
             豊南エリアのスーパー（ライフ・ダイエー・サタケ・万代など）のチラシ情報をAIが毎日集約！いつ・どこで買うのが一番お得か、一目でわかります。
           </p>
-          <div className="flex gap-2.5 bg-stone-100/50 p-1 rounded-3xl">
-            <button onClick={() => setCurrentTab("today")}    className={tabCls(currentTab === "today")}>
-              今日({todayStr})の特売品
-            </button>
-            <button onClick={() => setCurrentTab("tomorrow")} className={tabCls(currentTab === "tomorrow")}>
-              明日({tomorrowStr})の特売品
-            </button>
-          </div>
         </header>
 
         <main className="p-4 space-y-6">
@@ -444,6 +459,16 @@ export default function Dashboard({ data }) {
             openIdx={openAccordion}
             onToggle={toggleAccordion}
           />
+
+          {/* タブをここに移動 */}
+          <div className="flex gap-2.5 bg-stone-100/50 p-1 rounded-3xl sticky top-[100px] z-40 backdrop-blur-md">
+            <button onClick={() => setCurrentTab("today")}    className={tabCls(currentTab === "today")}>
+              今日({todayStr})の特売品
+            </button>
+            <button onClick={() => setCurrentTab("tomorrow")} className={tabCls(currentTab === "tomorrow")}>
+              明日({tomorrowStr})の特売品
+            </button>
+          </div>
 
           <section className="bg-gradient-to-br from-amber-50 to-orange-50/50 p-4 rounded-3xl border border-orange-100 shadow-sm">
             <h2 className="text-[11px] font-bold text-orange-600 tracking-wider mb-3 flex items-center gap-1">
