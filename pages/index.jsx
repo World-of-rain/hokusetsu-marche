@@ -48,6 +48,7 @@ function DailyCarouselItem({ item }) {
         <div className="flex items-center flex-wrap gap-1">
           <span>{item.name}</span>
           {item.is_new && <span className="bg-amber-400 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">NEW</span>}
+          {item.sale_end_date && <span className="text-stone-400 text-[10px] font-medium ml-1">{item.sale_end_date}</span>}
         </div>
       </div>
 
@@ -127,6 +128,7 @@ function StockAccordion({ stocks, openIdx, onToggle }) {
                       <div className="flex items-center flex-wrap gap-1 mr-2">
                         <span className="font-medium text-stone-600">{item.name}</span>
                         {item.is_new && <span className="bg-amber-400 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">NEW</span>}
+                        {item.sale_end_date && <span className="text-stone-400 text-[10px] font-medium ml-1">{item.sale_end_date}</span>}
                       </div>
                       <span className="flex-shrink-0">
                         <strong className="text-rose-600 font-black text-[13px]">{item.price}円</strong>
@@ -156,6 +158,7 @@ function HighlightCard({ h }) {
           <div className="flex items-center flex-wrap gap-1">
             <span className="font-black text-[13px] text-stone-800 leading-tight">{h.name}</span>
             {h.is_new && <span className="bg-amber-400 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">NEW</span>}
+            {!h.is_one_day_sale && h.sale_end_date && <span className="text-stone-400 text-[10px] font-medium ml-1">{h.sale_end_date}</span>}
           </div>
           <span className="flex-shrink-0 ml-2 text-[10px] bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-bold">
             {h.day === "today" ? "今日限定" : "明日限定"}
@@ -282,6 +285,7 @@ function GeneralTable({ items, searchQuery, setSearchQuery, sortKey, setSortKey,
                       <span className="font-bold text-stone-700">{item.name}</span>
                       {item.is_new && <span className="bg-amber-400 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">NEW</span>}
                       {item.is_one_day_sale && <span className="bg-teal-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">本日限り</span>}
+                      {!item.is_one_day_sale && item.sale_end_date && <span className="text-stone-400 text-[10px] font-medium ml-1">{item.sale_end_date}</span>}
                     </div>
                     {item.warning && currentTab === "today" && (
                       <span className="inline-block mt-1 text-[10px] bg-rose-100 text-rose-700 font-bold px-2 py-0.5 rounded-full animate-pulse">
@@ -361,7 +365,7 @@ export default function Dashboard({ data }) {
       if (!minSlot) return;
       const label = s.category_label || "その他ストック";
       if (!groups[label]) groups[label] = [];
-      groups[label].push({ name: s.name, price: minSlot.price, shop: minSlot.shop, is_new: s.is_new });
+      groups[label].push({ name: s.name, price: minSlot.price, shop: minSlot.shop, is_new: s.is_new, sale_end_date: s.sale_end_date });
     });
     return Object.entries(groups).map(([cat, items]) => ({ cat, items }));
   }, [data.stocks]);
@@ -480,6 +484,7 @@ export default function Dashboard({ data }) {
             imgUrl="https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=200&q=80"
           />
 
+          {/* 対象スーパーリスト */}
           <div className="text-center pt-4 pb-2">
             <p className="text-[11px] text-stone-500 font-bold mb-2">【データ取得対象スーパー】</p>
             <div className="flex flex-wrap justify-center gap-2 text-[10px]">
@@ -499,19 +504,16 @@ export default function Dashboard({ data }) {
   );
 }
 
-// --- pages/index.jsx の一番下 ---
-
 export async function getStaticProps() {
   const data = await fetchSaleData();
   
-  // 本番ビルド時にデータ取得に失敗した場合は、意図的にエラーを投げてビルドを失敗させる
   if (!data && process.env.NODE_ENV === 'production') {
     throw new Error("Failed to fetch sale data during production build. Aborting to keep the previous successful deployment.");
   }
 
   return {
     props: {
-      data: data || SAMPLE_DATA, // ローカル開発時(npm run dev)はSAMPLE_DATAにフォールバック
+      data: data || SAMPLE_DATA,
     },
   };
 }
