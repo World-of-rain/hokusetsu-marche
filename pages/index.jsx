@@ -10,7 +10,6 @@ const SAMPLE_DATA = {
   general: [],
 };
 
-// 画像が読み込めなかった場合に頭文字を表示するフォールバックコンポーネント
 function FallbackImage({ src, alt, className }) {
   const [error, setError] = useState(false);
   
@@ -48,7 +47,104 @@ function NativeAd({ title, description, imgUrl }) {
   );
 }
 
-function DailyCarouselItem({ item }) {
+// ▼▼▼ 新規追加：ボトムシート（詳細情報モーダル） ▼▼▼
+function BottomSheet({ item, onClose }) {
+  if (!item) return null;
+
+  const discountRate = item.avg_price > 0 && item.price > 0 
+    ? Math.round(((item.avg_price - item.price) / item.avg_price) * 100) 
+    : 0;
+
+  return (
+    <>
+      {/* 背景のオーバーレイ */}
+      <div 
+        className="fixed inset-0 bg-black/40 z-[100] transition-opacity"
+        onClick={onClose}
+      ></div>
+      
+      {/* ボトムシート本体 */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl z-[101] p-5 pb-8 shadow-2xl transform transition-transform max-w-md mx-auto">
+        <div className="w-12 h-1.5 bg-stone-200 rounded-full mx-auto mb-4"></div>
+        
+        <div className="flex gap-4 items-start mb-4">
+          <FallbackImage src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-2xl shadow-sm" />
+          <div>
+            <h3 className="font-black text-stone-800 text-lg leading-tight">{item.name}</h3>
+            <p className="text-stone-500 text-xs mt-1">{item.shop}</p>
+          </div>
+        </div>
+
+        <div className="bg-[#faf9f8] rounded-2xl p-4 mb-4 border border-stone-100">
+          <div className="flex justify-between items-end mb-2">
+            <span className="text-stone-500 text-xs font-bold">特売価格</span>
+            <div className="flex items-baseline gap-1">
+              <span className="text-3xl font-black text-rose-600 leading-none">{item.price}</span>
+              <span className="text-rose-600 font-bold">円</span>
+            </div>
+          </div>
+          
+          {item.avg_price > 0 && (
+            <div className="flex justify-between items-center py-2 border-t border-stone-200/60 border-dashed">
+              <span className="text-stone-500 text-[11px]">過去の平均価格</span>
+              <span className="text-stone-700 text-xs font-bold">{item.avg_price}円</span>
+            </div>
+          )}
+          {item.min_price > 0 && (
+            <div className="flex justify-between items-center py-2 border-t border-stone-200/60 border-dashed">
+              <span className="text-stone-500 text-[11px]">過去最安値</span>
+              <span className="text-stone-700 text-xs font-bold">{item.min_price}円</span>
+            </div>
+          )}
+          
+          {discountRate > 0 && (
+            <div className="mt-2 bg-rose-100 text-rose-700 text-xs font-bold text-center py-1.5 rounded-xl">
+              平均より {discountRate}% お得！🎉
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-3">
+          {item.purchase_condition && (
+            <div className="flex gap-2 items-start bg-amber-50 p-3 rounded-xl border border-amber-100">
+              <span className="text-amber-500 mt-0.5">⚠️</span>
+              <div>
+                <div className="text-[10px] font-bold text-amber-700 mb-0.5">購入条件・備考</div>
+                <div className="text-xs text-amber-900 font-medium">{item.purchase_condition}</div>
+              </div>
+            </div>
+          )}
+          
+          {(item.sale_start_date || item.sale_end_date) && (
+            <div className="flex gap-2 items-center text-xs text-stone-600 bg-stone-50 p-3 rounded-xl">
+              <span>📅</span>
+              <span className="font-medium">
+                販売期間: {item.sale_start_date || "本日"} 〜 {item.sale_end_date ? item.sale_end_date.replace("まで", "") : "未定"}
+              </span>
+            </div>
+          )}
+
+          {item.comment && (
+            <div className="flex gap-2 items-start text-xs text-teal-800 bg-teal-50 p-3 rounded-xl">
+              <span>💡</span>
+              <span className="font-medium leading-relaxed">{item.comment}</span>
+            </div>
+          )}
+        </div>
+        
+        <button 
+          onClick={onClose}
+          className="w-full mt-6 bg-stone-800 text-white font-bold py-3.5 rounded-2xl active:bg-stone-700 transition-colors"
+        >
+          閉じる
+        </button>
+      </div>
+    </>
+  );
+}
+// ▲▲▲ ここまで ▲▲▲
+
+function DailyCarouselItem({ item, onClick }) {
   const todaySlot    = item.schedule.find(s => s.day.includes("今日"));
   const tomorrowSlot = item.schedule.find(s => s.day.includes("明日"));
   const firstMinSlot = item.schedule.find(s => s.isMin);
@@ -66,7 +162,20 @@ function DailyCarouselItem({ item }) {
 
   return (
     <div className="border-b border-stone-100 last:border-0 pb-4 last:pb-0">
-      <div className="text-[13px] font-bold text-stone-700 mb-2 flex items-center gap-2">
+      <div 
+        className="text-[13px] font-bold text-stone-700 mb-2 flex items-center gap-2 cursor-pointer active:opacity-50"
+        onClick={() => onClick({
+          name: item.name,
+          shop: firstMinSlot?.shop || "-",
+          price: firstMinSlot?.price || 0,
+          image: item.image,
+          avg_price: item.avg_price,
+          min_price: item.min_price,
+          sale_end_date: item.sale_end_date,
+          purchase_condition: firstMinSlot?.purchase_condition || "",
+          comment: adviceText
+        })}
+      >
         <FallbackImage src={item.image} alt={item.name} className="w-6 h-6 rounded-full object-cover shadow-sm" />
         <div className="flex items-center flex-wrap gap-1">
           <span>{item.name}</span>
@@ -107,7 +216,7 @@ function DailyCarouselItem({ item }) {
   );
 }
 
-function StockAccordion({ stocks, openIdx, onToggle }) {
+function StockAccordion({ stocks, openIdx, onToggle, onClick }) {
   return (
     <section>
       <h2 className="text-[11px] font-bold text-stone-500 tracking-wider mb-2 px-1 flex items-center gap-1">
@@ -146,7 +255,8 @@ function StockAccordion({ stocks, openIdx, onToggle }) {
                   {s.items.map((item, j) => (
                     <div
                       key={j}
-                      className="flex justify-between items-center py-1.5 border-b border-stone-100 last:border-0"
+                      className="flex justify-between items-center py-1.5 border-b border-stone-100 last:border-0 cursor-pointer active:bg-stone-100"
+                      onClick={() => onClick(item)}
                     >
                       <div className="flex items-center flex-wrap gap-1 mr-2">
                         <span className="font-medium text-stone-600">{item.name}</span>
@@ -169,9 +279,12 @@ function StockAccordion({ stocks, openIdx, onToggle }) {
   );
 }
 
-function HighlightCard({ h }) {
+function HighlightCard({ h, onClick }) {
   return (
-    <div className="bg-white p-2.5 rounded-2xl shadow-sm border border-orange-100 relative overflow-hidden flex gap-2.5">
+    <div 
+      className="bg-white p-2.5 rounded-2xl shadow-sm border border-orange-100 relative overflow-hidden flex gap-2.5 cursor-pointer active:scale-[0.98] transition-transform"
+      onClick={() => onClick(h)}
+    >
       <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-orange-400 to-rose-400"></div>
       
       <FallbackImage src={h.image} alt={h.name} className="w-12 h-12 object-cover rounded-xl flex-shrink-0 ml-1 shadow-sm text-lg" />
@@ -199,7 +312,7 @@ function HighlightCard({ h }) {
   );
 }
 
-function GeneralTable({ items, searchQuery, setSearchQuery, sortKey, setSortKey, currentTab, storeFilter, setStoreFilter, availableStores, categoryFilter, setCategoryFilter, availableCategories, onlyOneDay, setOnlyOneDay }) {
+function GeneralTable({ items, searchQuery, setSearchQuery, sortKey, setSortKey, currentTab, storeFilter, setStoreFilter, availableStores, categoryFilter, setCategoryFilter, availableCategories, onlyOneDay, setOnlyOneDay, onClick }) {
   return (
     <section className="bg-white rounded-3xl shadow-sm border border-stone-100 overflow-hidden relative">
       <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '16px 16px' }}></div>
@@ -228,7 +341,6 @@ function GeneralTable({ items, searchQuery, setSearchQuery, sortKey, setSortKey,
         </div>
         
         <div className="flex flex-col gap-2 pb-1">
-          {/* 店舗フィルター（横スクロールをこの行だけに適用） */}
           <div className="flex gap-1.5 overflow-x-auto no-sb pb-1">
             <button
               onClick={() => setStoreFilter("all")}
@@ -250,7 +362,6 @@ function GeneralTable({ items, searchQuery, setSearchQuery, sortKey, setSortKey,
               </button>
             ))}
           </div>
-          {/* カテゴリフィルター & 本日のみ（横スクロールをこの行だけに適用） */}
           <div className="flex gap-1.5 items-center overflow-x-auto no-sb pb-1">
             <button
               onClick={() => setCategoryFilter("all")}
@@ -302,7 +413,11 @@ function GeneralTable({ items, searchQuery, setSearchQuery, sortKey, setSortKey,
               </tr>
             ) : (
               items.map((item, i) => (
-                <tr key={i} className="hover:bg-rose-50/30 transition-colors bg-white even:bg-stone-50/50">
+                <tr 
+                  key={i} 
+                  className="hover:bg-rose-50/30 transition-colors bg-white even:bg-stone-50/50 cursor-pointer active:bg-stone-100"
+                  onClick={() => onClick(item)}
+                >
                   <td className="p-3 pl-4 text-xs">
                     <div className="flex items-center flex-wrap gap-1">
                       <span className="font-bold text-stone-700">{item.name}</span>
@@ -340,6 +455,7 @@ export default function Dashboard({ data }) {
   const [storeFilter,   setStoreFilter]   = useState("all");
   const [categoryFilter,setCategoryFilter]= useState("all");
   const [onlyOneDay,    setOnlyOneDay]    = useState(false);
+  const [selectedItem,  setSelectedItem]  = useState(null); // ボトムシート用
 
   const toggleAccordion = idx =>
     setOpenAccordion(prev => (prev === idx ? null : idx));
@@ -388,12 +504,22 @@ export default function Dashboard({ data }) {
       if (!minSlot) return;
       const label = s.category_label || "その他ストック";
       if (!groups[label]) groups[label] = [];
-      groups[label].push({ name: s.name, price: minSlot.price, shop: minSlot.shop, is_new: s.is_new, sale_end_date: s.sale_end_date });
+      groups[label].push({ 
+        name: s.name, 
+        price: minSlot.price, 
+        shop: minSlot.shop, 
+        is_new: s.is_new, 
+        sale_end_date: s.sale_end_date,
+        image: s.image,
+        avg_price: s.avg_price,
+        min_price: s.min_price,
+        purchase_condition: minSlot.purchase_condition,
+        comment: minSlot.advice
+      });
     });
     return Object.entries(groups).map(([cat, items]) => ({ cat, items }));
   }, [data.stocks]);
 
-  // 日付の計算
   const todayDate = new Date();
   const tomorrowDate = new Date(todayDate);
   tomorrowDate.setDate(tomorrowDate.getDate() + 1);
@@ -441,7 +567,7 @@ export default function Dashboard({ data }) {
             </h2>
             <div className="space-y-4">
               {data.daily.length > 0 ? (
-                data.daily.map((item, i) => <DailyCarouselItem key={i} item={item} />)
+                data.daily.map((item, i) => <DailyCarouselItem key={i} item={item} onClick={setSelectedItem} />)
               ) : (
                 <p className="text-xs text-stone-400 text-center py-4">データがありません</p>
               )}
@@ -458,9 +584,9 @@ export default function Dashboard({ data }) {
             stocks={formattedStocks}
             openIdx={openAccordion}
             onToggle={toggleAccordion}
+            onClick={setSelectedItem}
           />
 
-          {/* タブ（固定を解除して自然な配置に） */}
           <div className="flex gap-2.5 bg-stone-100/50 p-1 rounded-3xl">
             <button onClick={() => setCurrentTab("today")}    className={tabCls(currentTab === "today")}>
               今日({todayStr})の特売品
@@ -476,7 +602,7 @@ export default function Dashboard({ data }) {
             </h2>
             <div className="space-y-3">
               {filteredHighlights.length > 0
-                ? filteredHighlights.map((h, i) => <HighlightCard key={i} h={h} />)
+                ? filteredHighlights.map((h, i) => <HighlightCard key={i} h={h} onClick={setSelectedItem} />)
                 : (
                   <p className="text-[11px] text-orange-400 text-center py-3 bg-white/50 rounded-xl">
                     {currentTab === "today" ? "今日" : "明日"}の目玉品はありません
@@ -501,6 +627,7 @@ export default function Dashboard({ data }) {
             availableCategories={availableCategories}
             onlyOneDay={onlyOneDay}
             setOnlyOneDay={setOnlyOneDay}
+            onClick={setSelectedItem}
           />
 
           <NativeAd 
@@ -509,7 +636,6 @@ export default function Dashboard({ data }) {
             imgUrl="https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=200&q=80"
           />
 
-          {/* 対象スーパーリスト */}
           <div className="text-center pt-4 pb-2">
             <p className="text-[11px] text-stone-500 font-bold mb-2">【データ取得対象スーパー】</p>
             <div className="flex flex-wrap justify-center gap-2 text-[10px]">
@@ -525,6 +651,9 @@ export default function Dashboard({ data }) {
 
         </main>
       </div>
+      
+      {/* ボトムシートの呼び出し */}
+      <BottomSheet item={selectedItem} onClose={() => setSelectedItem(null)} />
     </div>
   );
 }
