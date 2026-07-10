@@ -142,7 +142,7 @@ function BottomSheet({ item, onClose }) {
     </>
   );
 }
-// ▲▲▲ ここまで ▲▲▲
+// ▲▲▲  ここまで  ▲▲▲
 
 function DailyCarouselItem({ item, onClick }) {
   const todaySlot    = item.schedule.find(s => s.day.includes("今日"));
