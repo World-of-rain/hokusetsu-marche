@@ -47,7 +47,7 @@ function NativeAd({ title, description, imgUrl }) {
   );
 }
 
-// ▼▼▼ 新規追加：ボトムシート（詳細情報モーダル） ▼▼▼
+// ▼▼▼ 新規追加：ボトムシート（詳細情報モーダル）  ▼▼▼
 function BottomSheet({ item, onClose }) {
   if (!item) return null;
 
