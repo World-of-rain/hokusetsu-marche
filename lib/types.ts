@@ -57,6 +57,12 @@ export const DashboardResponseSchema = z.object({
   general: z.array(GeneralItemSchema),
 });
 
+// Pages Function（/api/prices/{area}）が返すKV由来のデータ。
+// バックエンドが書き込み時刻 generated_at を付与する
+export const LiveDashboardSchema = DashboardResponseSchema.extend({
+  generated_at: z.string().optional(),
+});
+
 export type PricePoint = z.infer<typeof PricePointSchema>;
 export type ScheduleItem = z.infer<typeof ScheduleItemSchema>;
 export type DailyItem = z.infer<typeof DailyItemSchema>;

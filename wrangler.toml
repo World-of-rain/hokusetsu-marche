@@ -1,0 +1,18 @@
+# Cloudflare Pages のプロジェクト設定（gitリポジトリでコード管理）。
+# KVバインディングはここで定義され、ビルド時に自動適用される
+# （ダッシュボードでの手動設定は不要）。
+name = "hokusetsu-marche"
+pages_build_output_dir = "out"
+compatibility_date = "2026-07-01"
+
+# 本番環境: NASのworkerがダッシュボードJSONを書き込むKV
+[[kv_namespaces]]
+binding = "SALE_DATA"
+id = "72b18c04f2814535bd6c0b328fb43dc5"
+
+# プレビュー環境（PRのプレビュービルド）も同じKVを読む
+[env.preview]
+
+[[env.preview.kv_namespaces]]
+binding = "SALE_DATA"
+id = "72b18c04f2814535bd6c0b328fb43dc5"

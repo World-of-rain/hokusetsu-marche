@@ -4,6 +4,7 @@ import type { GetStaticProps } from "next";
 
 import { fetchSaleData } from "../lib/db";
 import { STORE_LINKS } from "../lib/storeLinks";
+import { useLiveDashboardData } from "../lib/useLiveData";
 import type { DashboardData, SelectedItem, StockGroup } from "../lib/types";
 import FallbackImage from "../components/FallbackImage";
 import NativeAd from "../components/NativeAd";
@@ -25,7 +26,10 @@ type Props = {
   data: DashboardData;
 };
 
-export default function Dashboard({ data }: Props) {
+export default function Dashboard({ data: initialData }: Props) {
+  // ビルド時データを初期表示し、表示後にKV（Pages Function）の最新データへ差し替える
+  const data = useLiveDashboardData(initialData);
+
   const [currentTab, setCurrentTab] = useState<"today" | "tomorrow">("today");
   const [sortKey, setSortKey] = useState<SortKey>("price");
   const [searchQuery, setSearchQuery] = useState("");
