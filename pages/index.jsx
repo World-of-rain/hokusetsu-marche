@@ -10,6 +10,69 @@ const SAMPLE_DATA = {
   general: [],
 };
 
+// 店舗名 → チラシページURL。フッターの一覧と詳細画面のリンクの両方で使う
+const STORE_LINKS = [
+  { name: "ライフ 庄内店", url: "https://tokubai.co.jp/%E3%83%A9%E3%82%A4%E3%83%95/7345" },
+  { name: "ダイエー 豊中店", url: "https://tokubai.co.jp/%E3%83%80%E3%82%A4%E3%82%A8%E3%83%BC/10014" },
+  { name: "サタケ 豊南店", url: "https://satake-takenoko.co.jp/flyer/index.html" },
+  { name: "万代 豊中豊南店", url: "https://tokubai.co.jp/%E4%B8%87%E4%BB%A3/14011" },
+  { name: "サンディ 庄内栄町店", url: "https://tokubai.co.jp/%E3%82%B5%E3%83%B3%E3%83%87%E3%82%A3/14012" },
+  { name: "ジャパン 豊中庄内店", url: "https://tokubai.co.jp/%E3%82%B8%E3%83%A3%E3%83%91%E3%83%B3/14013" },
+  { name: "スギ薬局 豊中庄内店", url: "https://tokubai.co.jp/%E3%82%B9%E3%82%AE%E8%96%AC%E5%B1%80/14014" },
+];
+
+function getStoreUrl(shop) {
+  if (!shop || shop === "-") return null;
+  const hit =
+    STORE_LINKS.find(s => s.name === shop) ||
+    STORE_LINKS.find(s => shop.includes(s.name) || s.name.includes(shop));
+  return hit ? hit.url : null;
+}
+
+// 過去30日の価格推移スパークライン（ライブラリ不使用の素SVG）
+function PriceSparkline({ history, avgPrice }) {
+  if (!history || history.length < 2) return null;
+
+  const W = 300, H = 80, PX = 8, PY = 10;
+  const prices = history.map(h => h.price);
+  const minPrice = Math.min(...prices);
+  const maxPrice = Math.max(...prices);
+  let lo = minPrice;
+  let hi = maxPrice;
+  if (avgPrice > 0) {
+    lo = Math.min(lo, avgPrice);
+    hi = Math.max(hi, avgPrice);
+  }
+  const span = hi - lo || 1;
+  const x = i => PX + (i * (W - PX * 2)) / (history.length - 1);
+  const y = p => PY + (H - PY * 2) * (1 - (p - lo) / span);
+  const points = history.map((h, i) => `${x(i)},${y(h.price)}`).join(" ");
+  const minIdx = prices.indexOf(minPrice);
+  const lastIdx = history.length - 1;
+
+  return (
+    <div className="bg-white rounded-2xl p-3 mb-4 border border-stone-100">
+      <div className="flex justify-between items-center mb-1">
+        <span className="text-[10px] font-bold text-stone-500">📈 過去30日の価格推移</span>
+        <span className="text-[9px] text-stone-400">{history[0].date} 〜 {history[lastIdx].date}</span>
+      </div>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" preserveAspectRatio="none">
+        {avgPrice > 0 && (
+          <line x1={PX} y1={y(avgPrice)} x2={W - PX} y2={y(avgPrice)} stroke="#a8a29e" strokeWidth="1" strokeDasharray="4 3" />
+        )}
+        <polyline points={points} fill="none" stroke="#e11d48" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+        <circle cx={x(minIdx)} cy={y(minPrice)} r="3.5" fill="#e11d48" />
+        <circle cx={x(lastIdx)} cy={y(prices[lastIdx])} r="3" fill="#fff" stroke="#e11d48" strokeWidth="2" />
+      </svg>
+      <div className="flex justify-between text-[9px] text-stone-400 mt-0.5">
+        <span>底値 {minPrice}円</span>
+        {avgPrice > 0 && <span>平均 {avgPrice}円（点線）</span>}
+        <span>最高 {maxPrice}円</span>
+      </div>
+    </div>
+  );
+}
+
 function FallbackImage({ src, alt, className }) {
   const [error, setError] = useState(false);
   
@@ -51,9 +114,11 @@ function NativeAd({ title, description, imgUrl }) {
 function BottomSheet({ item, onClose }) {
   if (!item) return null;
 
-  const discountRate = item.avg_price > 0 && item.price > 0 
-    ? Math.round(((item.avg_price - item.price) / item.avg_price) * 100) 
+  const discountRate = item.avg_price > 0 && item.price > 0
+    ? Math.round(((item.avg_price - item.price) / item.avg_price) * 100)
     : 0;
+
+  const storeUrl = getStoreUrl(item.shop);
 
   return (
     <>
@@ -71,7 +136,14 @@ function BottomSheet({ item, onClose }) {
           <FallbackImage src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-2xl shadow-sm" />
           <div>
             <h3 className="font-black text-stone-800 text-lg leading-tight">{item.name}</h3>
-            <p className="text-stone-500 text-xs mt-1">{item.shop}</p>
+            <p className="text-stone-500 text-xs mt-1">
+              {item.shop}
+              {item.slot_day && (
+                <span className="ml-1.5 bg-stone-100 text-stone-600 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                  {item.slot_day}
+                </span>
+              )}
+            </p>
           </div>
         </div>
 
@@ -104,6 +176,9 @@ function BottomSheet({ item, onClose }) {
           )}
         </div>
 
+        {/* 価格推移グラフ（主要セクションの商品のみ price_history が入っている） */}
+        <PriceSparkline history={item.price_history} avgPrice={item.avg_price} />
+
         <div className="space-y-3">
           {item.purchase_condition && (
             <div className="flex gap-2 items-start bg-amber-50 p-3 rounded-xl border border-amber-100">
@@ -132,12 +207,24 @@ function BottomSheet({ item, onClose }) {
           )}
         </div>
         
-        <button 
-          onClick={onClose}
-          className="w-full mt-6 bg-stone-800 text-white font-bold py-3.5 rounded-2xl active:bg-stone-700 transition-colors"
-        >
-          閉じる
-        </button>
+        <div className="mt-6 space-y-3">
+          {storeUrl && (
+            <a
+              href={storeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-1.5 w-full bg-white border-2 border-stone-200 text-stone-700 font-bold py-3 rounded-2xl active:bg-stone-100 transition-colors"
+            >
+              🏪 {item.shop} のチラシページを開く ↗
+            </a>
+          )}
+          <button
+            onClick={onClose}
+            className="w-full bg-stone-800 text-white font-bold py-3.5 rounded-2xl active:bg-stone-700 transition-colors"
+          >
+            閉じる
+          </button>
+        </div>
       </div>
     </>
   );
@@ -173,7 +260,9 @@ function DailyCarouselItem({ item, onClick }) {
           min_price: item.min_price,
           sale_end_date: item.sale_end_date,
           purchase_condition: firstMinSlot?.purchase_condition || "",
-          comment: adviceText
+          comment: adviceText,
+          slot_day: firstMinSlot?.day || "",
+          price_history: item.price_history
         })}
       >
         <FallbackImage src={item.image} alt={item.name} className="w-6 h-6 rounded-full object-cover shadow-sm" />
@@ -188,11 +277,24 @@ function DailyCarouselItem({ item, onClick }) {
         {item.schedule.map((s, i) => (
           <div
             key={i}
+            onClick={() => s.price > 0 && onClick({
+              name: item.name,
+              shop: s.shop,
+              price: s.price,
+              image: item.image,
+              avg_price: item.avg_price,
+              min_price: item.min_price,
+              sale_end_date: item.sale_end_date,
+              purchase_condition: s.purchase_condition || "",
+              comment: s.advice || "",
+              slot_day: s.day,
+              price_history: item.price_history
+            })}
             className={`flex-shrink-0 w-[86px] p-2 rounded-2xl border text-center transition-all ${
               s.isMin
                 ? "bg-rose-50 border-rose-200 shadow-sm ring-1 ring-rose-100"
                 : "bg-white border-stone-200"
-            }`}
+            } ${s.price > 0 ? "cursor-pointer active:scale-95" : "opacity-70"}`}
           >
             <div className="text-[10px] text-stone-500 font-medium mb-0.5">{s.day}</div>
             <div className={`text-[13px] font-black ${s.isMin ? "text-rose-600" : "text-stone-700"}`}>
@@ -504,17 +606,19 @@ export default function Dashboard({ data }) {
       if (!minSlot) return;
       const label = s.category_label || "その他ストック";
       if (!groups[label]) groups[label] = [];
-      groups[label].push({ 
-        name: s.name, 
-        price: minSlot.price, 
-        shop: minSlot.shop, 
-        is_new: s.is_new, 
+      groups[label].push({
+        name: s.name,
+        price: minSlot.price,
+        shop: minSlot.shop,
+        is_new: s.is_new,
         sale_end_date: s.sale_end_date,
         image: s.image,
         avg_price: s.avg_price,
         min_price: s.min_price,
         purchase_condition: minSlot.purchase_condition,
-        comment: minSlot.advice
+        comment: minSlot.advice,
+        slot_day: minSlot.day,
+        price_history: s.price_history
       });
     });
     return Object.entries(groups).map(([cat, items]) => ({ cat, items }));
@@ -639,13 +743,9 @@ export default function Dashboard({ data }) {
           <div className="text-center pt-4 pb-2">
             <p className="text-[11px] text-stone-500 font-bold mb-2">【データ取得対象スーパー】</p>
             <div className="flex flex-wrap justify-center gap-2 text-[10px]">
-              <a href="https://tokubai.co.jp/%E3%83%A9%E3%82%A4%E3%83%95/7345" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">ライフ 庄内店</a>
-              <a href="https://tokubai.co.jp/%E3%83%80%E3%82%A4%E3%82%A8%E3%83%BC/10014" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">ダイエー 豊中店</a>
-              <a href="https://satake-takenoko.co.jp/flyer/index.html" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">サタケ 豊南店</a>
-              <a href="https://tokubai.co.jp/%E4%B8%87%E4%BB%A3/14011" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">万代 豊中豊南店</a>
-              <a href="https://tokubai.co.jp/%E3%82%B5%E3%83%B3%E3%83%87%E3%82%A3/14012" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">サンディ 庄内栄町店</a>
-              <a href="https://tokubai.co.jp/%E3%82%B8%E3%83%A3%E3%83%91%E3%83%B3/14013" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">ジャパン 豊中庄内店</a>
-              <a href="https://tokubai.co.jp/%E3%82%B9%E3%82%AE%E8%96%AC%E5%B1%80/14014" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">スギ薬局 豊中庄内店</a>
+              {STORE_LINKS.map(s => (
+                <a key={s.name} href={s.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">{s.name}</a>
+              ))}
             </div>
           </div>
 
