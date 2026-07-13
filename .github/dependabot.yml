@@ -11,6 +11,12 @@ updates:
       # マイナー・パッチ更新は1つのPRにまとめる（CIが通れば安全に取り込める）
       minor-and-patch:
         update-types: ["minor", "patch"]
+    ignore:
+      # メジャー更新は互換性の検証と移行作業が必要なため自動PRの対象外とする
+      # （例: eslint 10 は eslint-config-next が未対応でビルド不能になる）。
+      # メジャーアップは必要になったタイミングで手動で実施する
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     open-pull-requests-limit: 5
 
   - package-ecosystem: "github-actions"
