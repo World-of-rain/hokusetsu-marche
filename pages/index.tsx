@@ -336,17 +336,17 @@ export default function Dashboard({ data: initialData }: Props) {
 }
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
+  // ビルド時のデータ取得はSEO・初回表示用のベストエフォート。
+  // 実データはページ表示後に Pages Function（KV）経由で取得・差し替えされるため、
+  // ビルド環境からNASに到達できなくてもビルドは止めない（KVにデータがあれば表示は正常になる）。
+  // かつては取得失敗時にビルドを中断していたが、KV配信の導入で不要になった。
+  // 新規プロジェクトでは中断するとサイトが1つも公開されないため、必ずサンプルデータで通す。
   const data = await fetchSaleData();
 
-  // 本番デプロイ（mainブランチ）でデータ取得に失敗した場合のみビルドを中断し、
-  // 前回の正常なデプロイを維持する。プレビュービルド（DependabotのPR等）は
-  // API_URLが無くビルド環境からNASに到達できないため、サンプルデータで通す
-  // （実データはページ表示後にKVから取得される）。
-  const isPreviewDeploy = !!process.env.CF_PAGES_BRANCH && process.env.CF_PAGES_BRANCH !== "main";
-
-  if (!data && process.env.NODE_ENV === "production" && !isPreviewDeploy) {
-    throw new Error(
-      "Failed to fetch sale data during production build. Aborting to keep the previous successful deployment."
+  if (!data) {
+    console.warn(
+      "ビルド時のデータ取得に失敗しました。サンプルデータでビルドし、実データはページ表示後に" +
+        "KVから取得します（API_URL未設定・NAS到達不能などの場合の正常なフォールバックです）。"
     );
   }
 
