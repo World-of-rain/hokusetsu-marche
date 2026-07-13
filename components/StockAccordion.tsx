@@ -11,7 +11,7 @@ type Props = {
 export default function StockAccordion({ stocks, openIdx, onToggle, onClick }: Props) {
   return (
     <section>
-      <h2 className="text-[11px] font-bold text-stone-500 tracking-wider mb-2 px-1 flex items-center gap-1">
+      <h2 className="text-[11px] font-bold text-stone-600 tracking-wider mb-2 px-1 flex items-center gap-1">
         <span>🥫</span> ストック・まとめ買いのチャンス
       </h2>
       <div className="space-y-1.5">
@@ -58,12 +58,12 @@ export default function StockAccordion({ stocks, openIdx, onToggle, onClick }: P
                       <div className="flex items-center flex-wrap gap-1 mr-2">
                         <span className="font-medium text-stone-600">{item.name}</span>
                         {item.is_new && (
-                          <span className="bg-amber-400 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
+                          <span className="bg-amber-400 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
                             NEW
                           </span>
                         )}
                         {item.sale_end_date && (
-                          <span className="text-stone-400 text-[9px] font-medium ml-1">
+                          <span className="text-stone-500 text-[10px] font-medium ml-1">
                             {item.sale_end_date}
                           </span>
                         )}
@@ -72,7 +72,7 @@ export default function StockAccordion({ stocks, openIdx, onToggle, onClick }: P
                         <strong className="text-rose-600 font-black text-[13px]">
                           {item.price}円
                         </strong>
-                        <span className="text-stone-400 text-[9px] ml-1">({item.shop})</span>
+                        <span className="text-stone-500 text-[10px] ml-1">({item.shop})</span>
                       </span>
                     </div>
                   ))}

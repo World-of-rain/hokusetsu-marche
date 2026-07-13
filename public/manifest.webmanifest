@@ -1,0 +1,31 @@
+{
+  "name": "北摂マルシェ 〜豊南エリア特売情報〜",
+  "short_name": "北摂マルシェ",
+  "description": "豊南エリアのスーパーのチラシ情報をAIが毎日集約。いつ・どこで買うのが一番お得かが一目でわかります。",
+  "lang": "ja",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#faf9f8",
+  "theme_color": "#e11d48",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -77,6 +77,7 @@ export type SelectedItem = {
   name: string;
   shop: string;
   price: number;
+  category?: string;
   image?: string;
   avg_price?: number;
   min_price?: number;

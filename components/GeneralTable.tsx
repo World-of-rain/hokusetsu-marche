@@ -17,10 +17,12 @@ type Props = {
   availableCategories: string[];
   onlyOneDay: boolean;
   setOnlyOneDay: (v: boolean) => void;
+  favorites: string[];
+  onToggleFavorite: (name: string) => void;
   onClick: (item: SelectedItem) => void;
 };
 
-// 総合特売リスト（検索・絞り込み・ソート付きテーブル）
+// 総合特売リスト（検索・絞り込み・ソート・お気に入りピン留め付きテーブル）
 export default function GeneralTable({
   items,
   searchQuery,
@@ -36,6 +38,8 @@ export default function GeneralTable({
   availableCategories,
   onlyOneDay,
   setOnlyOneDay,
+  favorites,
+  onToggleFavorite,
   onClick,
 }: Props) {
   return (
@@ -49,20 +53,22 @@ export default function GeneralTable({
       ></div>
 
       <div className="p-4 border-b border-stone-100 bg-[#faf9f8] space-y-3 relative z-10">
-        <h2 className="text-[11px] font-bold text-stone-500 tracking-wider flex items-center gap-1">
-          <span>🥩</span> 総合特売リスト
+        <h2 className="text-[11px] font-bold text-stone-600 tracking-wider flex items-center gap-1">
+          <span aria-hidden="true">🥩</span> 総合特売リスト
         </h2>
         <div className="flex gap-2">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="商品名で検索..."
+            placeholder="商品名で検索（ひらがなでもOK）..."
+            aria-label="商品名で検索"
             className="flex-1 pl-3 pr-2 py-2 text-sm bg-white border border-stone-200 rounded-xl focus:outline-none focus:border-rose-400 focus:ring-1 focus:ring-rose-400 transition-shadow"
           />
           <select
             value={sortKey}
             onChange={(e) => setSortKey(e.target.value as SortKey)}
+            aria-label="並び順"
             className="text-xs font-bold bg-white border border-stone-200 rounded-xl px-2 focus:outline-none text-stone-600"
           >
             <option value="price">価格が安い順</option>
@@ -75,8 +81,9 @@ export default function GeneralTable({
           <div className="flex gap-1.5 overflow-x-auto no-sb pb-1">
             <button
               onClick={() => setStoreFilter("all")}
+              aria-pressed={storeFilter === "all"}
               className={`flex-shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition-colors ${
-                storeFilter === "all" ? "bg-rose-500 text-white" : "bg-stone-100 text-stone-500"
+                storeFilter === "all" ? "bg-rose-500 text-white" : "bg-stone-100 text-stone-600"
               }`}
             >
               すべての店舗
@@ -85,8 +92,9 @@ export default function GeneralTable({
               <button
                 key={store}
                 onClick={() => setStoreFilter(store)}
+                aria-pressed={storeFilter === store}
                 className={`flex-shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition-colors ${
-                  storeFilter === store ? "bg-rose-500 text-white" : "bg-stone-100 text-stone-500"
+                  storeFilter === store ? "bg-rose-500 text-white" : "bg-stone-100 text-stone-600"
                 }`}
               >
                 {store}
@@ -96,8 +104,9 @@ export default function GeneralTable({
           <div className="flex gap-1.5 items-center overflow-x-auto no-sb pb-1">
             <button
               onClick={() => setCategoryFilter("all")}
+              aria-pressed={categoryFilter === "all"}
               className={`flex-shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition-colors ${
-                categoryFilter === "all" ? "bg-rose-500 text-white" : "bg-stone-100 text-stone-500"
+                categoryFilter === "all" ? "bg-rose-500 text-white" : "bg-stone-100 text-stone-600"
               }`}
             >
               すべてのジャンル
@@ -106,8 +115,9 @@ export default function GeneralTable({
               <button
                 key={cat}
                 onClick={() => setCategoryFilter(cat)}
+                aria-pressed={categoryFilter === cat}
                 className={`flex-shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition-colors ${
-                  categoryFilter === cat ? "bg-rose-500 text-white" : "bg-stone-100 text-stone-500"
+                  categoryFilter === cat ? "bg-rose-500 text-white" : "bg-stone-100 text-stone-600"
                 }`}
               >
                 {cat}
@@ -116,6 +126,7 @@ export default function GeneralTable({
             <div className="w-px h-4 bg-stone-300 mx-1 flex-shrink-0"></div>
             <button
               onClick={() => setOnlyOneDay(!onlyOneDay)}
+              aria-pressed={onlyOneDay}
               className={`flex-shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition-colors border ${
                 onlyOneDay
                   ? "bg-teal-500 text-white border-teal-500"
@@ -131,8 +142,11 @@ export default function GeneralTable({
       <div className="overflow-x-auto relative z-10">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-stone-50 text-[10px] font-bold text-stone-400 border-b border-stone-100">
-              <th className="p-3 pl-4">商品名</th>
+            <tr className="bg-stone-50 text-[10px] font-bold text-stone-500 border-b border-stone-100">
+              <th className="p-2 pl-3 w-8">
+                <span className="sr-only">お気に入り</span>
+              </th>
+              <th className="p-3 pl-1">商品名</th>
               <th className="p-3 text-right">最安値</th>
               <th className="p-3 pr-4 text-right">取扱店</th>
             </tr>
@@ -140,50 +154,74 @@ export default function GeneralTable({
           <tbody className="divide-y divide-stone-50">
             {items.length === 0 ? (
               <tr>
-                <td colSpan={3} className="p-8 text-center text-stone-400 text-xs">
+                <td colSpan={4} className="p-8 text-center text-stone-500 text-xs">
                   対象の商品はありません
                 </td>
               </tr>
             ) : (
-              items.map((item, i) => (
-                <tr
-                  key={i}
-                  className="hover:bg-rose-50/30 transition-colors bg-white even:bg-stone-50/50 cursor-pointer active:bg-stone-100"
-                  onClick={() => onClick(item)}
-                >
-                  <td className="p-3 pl-4 text-xs">
-                    <div className="flex items-center flex-wrap gap-1">
-                      <span className="font-bold text-stone-700">{item.name}</span>
-                      {item.is_new && (
-                        <span className="bg-amber-400 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
-                          NEW
+              items.map((item, i) => {
+                const isFavorite = favorites.includes(item.name);
+                return (
+                  <tr
+                    key={i}
+                    className={`hover:bg-rose-50/30 transition-colors cursor-pointer active:bg-stone-100 ${
+                      isFavorite ? "bg-amber-50/60" : "bg-white even:bg-stone-50/50"
+                    }`}
+                    onClick={() => onClick(item)}
+                  >
+                    <td className="p-2 pl-3">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onToggleFavorite(item.name);
+                        }}
+                        aria-label={
+                          isFavorite
+                            ? `${item.name}をお気に入りから外す`
+                            : `${item.name}をお気に入りに追加`
+                        }
+                        aria-pressed={isFavorite}
+                        className={`text-base leading-none p-1 rounded-full transition-transform active:scale-125 ${
+                          isFavorite ? "text-amber-500" : "text-stone-300 hover:text-amber-400"
+                        }`}
+                      >
+                        {isFavorite ? "★" : "☆"}
+                      </button>
+                    </td>
+                    <td className="p-3 pl-1 text-xs">
+                      <div className="flex items-center flex-wrap gap-1">
+                        <span className="font-bold text-stone-700">{item.name}</span>
+                        {item.is_new && (
+                          <span className="bg-amber-400 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+                            NEW
+                          </span>
+                        )}
+                        {item.is_one_day_sale && (
+                          <span className="bg-teal-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+                            本日限り
+                          </span>
+                        )}
+                        {!item.is_one_day_sale && item.sale_end_date && (
+                          <span className="text-stone-500 text-[10px] font-medium ml-1">
+                            {item.sale_end_date}
+                          </span>
+                        )}
+                      </div>
+                      {item.warning && currentTab === "today" && (
+                        <span className="inline-block mt-1 text-[10px] bg-rose-100 text-rose-700 font-bold px-2 py-0.5 rounded-full animate-pulse">
+                          🛑 明日まで待って！
                         </span>
                       )}
-                      {item.is_one_day_sale && (
-                        <span className="bg-teal-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
-                          本日限り
-                        </span>
-                      )}
-                      {!item.is_one_day_sale && item.sale_end_date && (
-                        <span className="text-stone-400 text-[10px] font-medium ml-1">
-                          {item.sale_end_date}
-                        </span>
-                      )}
-                    </div>
-                    {item.warning && currentTab === "today" && (
-                      <span className="inline-block mt-1 text-[10px] bg-rose-100 text-rose-700 font-bold px-2 py-0.5 rounded-full animate-pulse">
-                        🛑 明日まで待って！
-                      </span>
-                    )}
-                  </td>
-                  <td className="p-3 text-sm font-black text-rose-600 text-right whitespace-nowrap">
-                    {item.price}円
-                  </td>
-                  <td className="p-3 pr-4 text-[11px] text-stone-500 text-right whitespace-nowrap">
-                    {item.shop}
-                  </td>
-                </tr>
-              ))
+                    </td>
+                    <td className="p-3 text-sm font-black text-rose-600 text-right whitespace-nowrap">
+                      {item.price}円
+                    </td>
+                    <td className="p-3 pr-4 text-[11px] text-stone-600 text-right whitespace-nowrap">
+                      {item.shop}
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

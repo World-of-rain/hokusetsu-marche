@@ -1,4 +1,4 @@
-import FallbackImage from "./FallbackImage";
+import EmojiIcon from "./EmojiIcon";
 import type { DailyItem, SelectedItem } from "../lib/types";
 
 type Props = {
@@ -37,7 +37,6 @@ export default function DailyCarouselItem({ item, onClick }: Props) {
             name: item.name,
             shop: firstMinSlot?.shop || "-",
             price: firstMinSlot?.price || 0,
-            image: item.image,
             avg_price: item.avg_price,
             min_price: item.min_price,
             sale_end_date: item.sale_end_date,
@@ -48,20 +47,20 @@ export default function DailyCarouselItem({ item, onClick }: Props) {
           })
         }
       >
-        <FallbackImage
-          src={item.image}
-          alt={item.name}
-          className="w-6 h-6 rounded-full object-cover shadow-sm"
+        <EmojiIcon
+          name={item.name}
+          className="w-7 h-7 rounded-full shadow-sm"
+          emojiClassName="text-sm"
         />
         <div className="flex items-center flex-wrap gap-1">
           <span>{item.name}</span>
           {item.is_new && (
-            <span className="bg-amber-400 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
+            <span className="bg-amber-400 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
               NEW
             </span>
           )}
           {item.sale_end_date && (
-            <span className="text-stone-400 text-[10px] font-medium ml-1">
+            <span className="text-stone-500 text-[10px] font-medium ml-1">
               {item.sale_end_date}
             </span>
           )}
@@ -78,7 +77,6 @@ export default function DailyCarouselItem({ item, onClick }: Props) {
                 name: item.name,
                 shop: s.shop,
                 price: s.price,
-                image: item.image,
                 avg_price: item.avg_price,
                 min_price: item.min_price,
                 sale_end_date: item.sale_end_date,
@@ -94,16 +92,16 @@ export default function DailyCarouselItem({ item, onClick }: Props) {
                 : "bg-white border-stone-200"
             } ${s.price > 0 ? "cursor-pointer active:scale-95" : "opacity-70"}`}
           >
-            <div className="text-[10px] text-stone-500 font-medium mb-0.5">{s.day}</div>
+            <div className="text-[10px] text-stone-600 font-medium mb-0.5">{s.day}</div>
             <div
               className={`text-[13px] font-black ${s.isMin ? "text-rose-600" : "text-stone-700"}`}
             >
               {s.price > 0 ? `${s.price}円` : "-"}
             </div>
-            <div className="text-[9px] text-stone-400 truncate mt-0.5">{s.shop}</div>
+            <div className="text-[10px] text-stone-500 truncate mt-0.5">{s.shop}</div>
 
             {s.isMin && (
-              <div className="inline-block mt-1 bg-rose-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full tracking-wide">
+              <div className="inline-block mt-1 bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full tracking-wide">
                 ★最安値
               </div>
             )}

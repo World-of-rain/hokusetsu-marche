@@ -33,7 +33,7 @@ export default function PriceSparkline({ history, avgPrice = 0 }: Props) {
     <div className="bg-white rounded-2xl p-3 mb-4 border border-stone-100">
       <div className="flex justify-between items-center mb-1">
         <span className="text-[10px] font-bold text-stone-500">📈 過去30日の価格推移</span>
-        <span className="text-[9px] text-stone-400">
+        <span className="text-[10px] text-stone-500">
           {history[0].date} 〜 {history[lastIdx].date}
         </span>
       </div>
@@ -67,7 +67,7 @@ export default function PriceSparkline({ history, avgPrice = 0 }: Props) {
           strokeWidth="2"
         />
       </svg>
-      <div className="flex justify-between text-[9px] text-stone-400 mt-0.5">
+      <div className="flex justify-between text-[10px] text-stone-500 mt-0.5">
         <span>底値 {minPrice}円</span>
         {avgPrice > 0 && <span>平均 {avgPrice}円（点線）</span>}
         <span>最高 {maxPrice}円</span>
