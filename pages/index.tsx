@@ -359,7 +359,14 @@ export default function Dashboard({ data: initialData }: Props) {
 export const getStaticProps: GetStaticProps<Props> = async () => {
   const data = await fetchSaleData();
 
-  if (!data && process.env.NODE_ENV === "production") {
+  // 本番デプロイ（mainブランチ）でデータ取得に失敗した場合のみビルドを中断し、
+  // 前回の正常なデプロイを維持する。プレビュービルド（DependabotのPR等）は
+  // API_URLが無くビルド環境からNASに到達できないため、サンプルデータで通す
+  // （実データはページ表示後にKVから取得される）。
+  const isPreviewDeploy =
+    !!process.env.CF_PAGES_BRANCH && process.env.CF_PAGES_BRANCH !== "main";
+
+  if (!data && process.env.NODE_ENV === "production" && !isPreviewDeploy) {
     throw new Error(
       "Failed to fetch sale data during production build. Aborting to keep the previous successful deployment."
     );
