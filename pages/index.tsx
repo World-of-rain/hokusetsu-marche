@@ -3,22 +3,24 @@ import Head from "next/head";
 import type { GetStaticProps } from "next";
 
 import { fetchSaleData } from "../lib/db";
-import { STORE_LINKS } from "../lib/storeLinks";
 import { useLiveDashboardData } from "../lib/useLiveData";
 import { useLocalStorageState } from "../lib/useLocalStorage";
 import { matchesSearch } from "../lib/search";
+import {
+  SITE_URL,
+  SITE_TITLE,
+  SITE_DESCRIPTION,
+  ADSENSE_SLOT_TOP,
+  ADSENSE_SLOT_BOTTOM,
+} from "../lib/site";
 import type { DashboardData, SelectedItem, StockGroup } from "../lib/types";
-import NativeAd from "../components/NativeAd";
+import AdUnit from "../components/AdUnit";
+import SiteFooter from "../components/SiteFooter";
 import BottomSheet from "../components/BottomSheet";
 import DailyCarouselItem from "../components/DailyCarouselItem";
 import StockAccordion from "../components/StockAccordion";
 import HighlightCard from "../components/HighlightCard";
 import GeneralTable, { type SortKey } from "../components/GeneralTable";
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://hokusetsu-marche.pages.dev";
-const SITE_TITLE = "北摂マルシェ 〜豊南エリア特売情報〜";
-const SITE_DESCRIPTION =
-  "豊南エリアのスーパー（ライフ・ダイエー・サタケ・万代など）のチラシ情報をAIが毎日集約。卵・牛乳などの底値カレンダー、今日の目玉品、価格推移グラフでいつ・どこで買うのが一番お得かが一目でわかります。";
 
 const SAMPLE_DATA: DashboardData = {
   lastUpdated: "取得失敗",
@@ -258,11 +260,7 @@ export default function Dashboard({ data: initialData }: Props) {
             </div>
           </section>
 
-          <NativeAd
-            title="【PR】豊中駅前の家事代行サービス"
-            description="お買い物からお料理まで。初回お試しキャンペーン実施中！"
-            emoji="🏠"
-          />
+          <AdUnit slot={ADSENSE_SLOT_TOP} />
 
           <StockAccordion
             stocks={formattedStocks}
@@ -325,29 +323,10 @@ export default function Dashboard({ data: initialData }: Props) {
             onClick={setSelectedItem}
           />
 
-          <NativeAd
-            title="【PR】お得なクレジットカード"
-            description="スーパーでの買い物が常にポイント2倍！今なら5000ptプレゼント"
-            emoji="💳"
-          />
-
-          <div className="text-center pt-4 pb-2">
-            <p className="text-[11px] text-stone-600 font-bold mb-2">【データ取得対象スーパー】</p>
-            <div className="flex flex-wrap justify-center gap-2 text-[10px]">
-              {STORE_LINKS.map((s) => (
-                <a
-                  key={s.name}
-                  href={s.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-700 underline"
-                >
-                  {s.name}
-                </a>
-              ))}
-            </div>
-          </div>
+          <AdUnit slot={ADSENSE_SLOT_BOTTOM} />
         </main>
+
+        <SiteFooter />
       </div>
 
       {/* ボトムシートの呼び出し */}

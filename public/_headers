@@ -1,11 +1,12 @@
 # Cloudflare Pages のセキュリティヘッダ設定
-# 画像・スクリプト・スタイルはすべて自前配信のため厳格なCSPを適用できる
+# Google AdSense を動作させるため、Google広告エコシステムのドメインを許可している。
+# 広告クリエイティブは無数の広告主ドメインから配信されるため img-src は https: を許容する。
 /*
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.googlesyndication.com https://*.googleadservices.com https://*.google.com https://*.doubleclick.net https://*.googletagservices.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://*.googlesyndication.com https://*.google.com https://*.doubleclick.net https://*.googleadservices.com; frame-src 'self' https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com; font-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
 
 # Service Workerは常に最新を取得させる
 /sw.js
