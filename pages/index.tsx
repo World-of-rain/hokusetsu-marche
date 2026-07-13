@@ -363,8 +363,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   // 前回の正常なデプロイを維持する。プレビュービルド（DependabotのPR等）は
   // API_URLが無くビルド環境からNASに到達できないため、サンプルデータで通す
   // （実データはページ表示後にKVから取得される）。
-  const isPreviewDeploy =
-    !!process.env.CF_PAGES_BRANCH && process.env.CF_PAGES_BRANCH !== "main";
+  const isPreviewDeploy = !!process.env.CF_PAGES_BRANCH && process.env.CF_PAGES_BRANCH !== "main";
 
   if (!data && process.env.NODE_ENV === "production" && !isPreviewDeploy) {
     throw new Error(
