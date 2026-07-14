@@ -1,4 +1,5 @@
-import EmojiIcon from "./EmojiIcon";
+import FoodIcon from "./FoodIcon";
+import Glyph from "./Glyph";
 import type { DailyItem, SelectedItem } from "../lib/types";
 
 type Props = {
@@ -18,13 +19,13 @@ export default function DailyCarouselItem({ item, onClick }: Props) {
       ? tomorrowSlot
       : (firstMinSlot ?? null);
 
-  const advicePrefix = !adviceSlot
-    ? "💡 "
+  const advice: { glyph: "bulb" | "hourglass" | "calendar"; label: string } = !adviceSlot
+    ? { glyph: "bulb", label: "" }
     : adviceSlot.day.includes("今日")
-      ? "💡 今日が買い！："
+      ? { glyph: "bulb", label: "今日が買い！：" }
       : adviceSlot.day.includes("明日")
-        ? "⏳ 明日まで待って："
-        : `📅 ${adviceSlot.day}が狙い目：`;
+        ? { glyph: "hourglass", label: "明日まで待って：" }
+        : { glyph: "calendar", label: `${adviceSlot.day}が狙い目：` };
 
   const adviceText = adviceSlot?.advice || "今週の底値曜日をチェックして計画的に購入しましょう。";
 
@@ -45,13 +46,15 @@ export default function DailyCarouselItem({ item, onClick }: Props) {
             slot_day: firstMinSlot?.day || "",
             price_history: item.price_history,
             store_url: firstMinSlot?.store_url || "",
+            icon: item.icon,
           })
         }
       >
-        <EmojiIcon
+        <FoodIcon
           name={item.name}
-          className="w-7 h-7 rounded-full shadow-sm"
-          emojiClassName="text-sm"
+          icon={item.icon}
+          className="w-8 h-8 rounded-xl shadow-sm"
+          padClassName="p-[12%]"
         />
         <div className="flex items-center flex-wrap gap-1">
           <span>{item.name}</span>
@@ -86,6 +89,7 @@ export default function DailyCarouselItem({ item, onClick }: Props) {
                 slot_day: s.day,
                 price_history: item.price_history,
                 store_url: s.store_url || "",
+                icon: item.icon,
               })
             }
             className={`flex-shrink-0 w-[86px] p-2 rounded-2xl border text-center transition-all ${
@@ -111,9 +115,12 @@ export default function DailyCarouselItem({ item, onClick }: Props) {
         ))}
       </div>
 
-      <div className="text-[11px] text-teal-800 bg-teal-50/70 border border-teal-100 rounded-xl p-2.5 mt-3 font-medium leading-relaxed">
-        <span className="font-bold">{advicePrefix}</span>
-        {adviceText}
+      <div className="text-[11px] text-teal-800 bg-teal-50/70 border border-teal-100 rounded-xl p-2.5 mt-3 font-medium leading-relaxed flex items-start gap-1.5">
+        <Glyph name={advice.glyph} className="w-3.5 h-3.5 text-teal-500 mt-0.5 flex-shrink-0" />
+        <span>
+          <span className="font-bold">{advice.label}</span>
+          {adviceText}
+        </span>
       </div>
     </div>
   );

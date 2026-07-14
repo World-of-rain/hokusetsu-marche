@@ -1,3 +1,6 @@
+import FoodIcon from "./FoodIcon";
+import SectionHeading from "./SectionHeading";
+import Glyph from "./Glyph";
 import type { GeneralItem, SelectedItem } from "../lib/types";
 
 export type SortKey = "price" | "shop" | "category";
@@ -53,9 +56,12 @@ export default function GeneralTable({
       ></div>
 
       <div className="p-4 border-b border-stone-100 bg-[#faf9f8] space-y-3 relative z-10">
-        <h2 className="text-[11px] font-bold text-stone-600 tracking-wider flex items-center gap-1">
-          <span aria-hidden="true">🥩</span> 総合特売リスト
-        </h2>
+        <SectionHeading
+          variant="list"
+          title="総合特売リスト"
+          tint="text-rose-600"
+          chipBg="from-rose-400 to-pink-400"
+        />
         <div className="flex gap-2">
           <input
             type="text"
@@ -189,6 +195,15 @@ export default function GeneralTable({
                       </button>
                     </td>
                     <td className="p-3 pl-1 text-xs">
+                      <div className="flex items-center gap-2">
+                        <FoodIcon
+                          name={item.name}
+                          category={item.category}
+                          icon={item.icon}
+                          className="w-8 h-8 rounded-lg flex-shrink-0"
+                          padClassName="p-[12%]"
+                        />
+                        <div className="min-w-0">
                       <div className="flex items-center flex-wrap gap-1">
                         <span className="font-bold text-stone-700">{item.name}</span>
                         {item.is_new && (
@@ -208,10 +223,12 @@ export default function GeneralTable({
                         )}
                       </div>
                       {item.warning && currentTab === "today" && (
-                        <span className="inline-block mt-1 text-[10px] bg-rose-100 text-rose-700 font-bold px-2 py-0.5 rounded-full animate-pulse">
-                          🛑 明日まで待って！
+                        <span className="inline-flex items-center gap-1 mt-1 text-[10px] bg-rose-100 text-rose-700 font-bold px-2 py-0.5 rounded-full animate-pulse">
+                          <Glyph name="stop" className="w-3 h-3" /> 明日まで待って！
                         </span>
                       )}
+                        </div>
+                      </div>
                     </td>
                     <td className="p-3 text-sm font-black text-rose-600 text-right whitespace-nowrap">
                       {item.price}円

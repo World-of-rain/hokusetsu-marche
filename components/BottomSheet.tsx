@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import EmojiIcon from "./EmojiIcon";
+import FoodIcon from "./FoodIcon";
+import Glyph from "./Glyph";
 import PriceSparkline from "./PriceSparkline";
 import { getStoreUrl } from "../lib/storeLinks";
 import type { SelectedItem } from "../lib/types";
@@ -149,11 +150,11 @@ export default function BottomSheet({ item, onClose }: Props) {
           <div className="w-10 h-1.5 bg-stone-300 rounded-full mx-auto mb-3"></div>
 
           <div className="flex gap-3 items-center">
-            <EmojiIcon
+            <FoodIcon
               name={item.name}
               category={item.category}
-              className="w-12 h-12 rounded-2xl shadow-sm flex-shrink-0"
-              emojiClassName="text-2xl"
+              icon={item.icon}
+              className="w-14 h-14 rounded-2xl shadow-sm flex-shrink-0"
             />
             <div className="min-w-0">
               <h3 className="font-black text-stone-800 text-base leading-tight truncate">
@@ -200,8 +201,9 @@ export default function BottomSheet({ item, onClose }: Props) {
             )}
 
             {discountRate > 0 && (
-              <div className="mt-1.5 bg-rose-100 text-rose-700 text-xs font-bold text-center py-1.5 rounded-xl">
-                平均より {discountRate}% お得！🎉
+              <div className="mt-1.5 bg-rose-100 text-rose-700 text-xs font-bold text-center py-1.5 rounded-xl flex items-center justify-center gap-1">
+                <Glyph name="sparkle" className="w-3.5 h-3.5" />
+                平均より {discountRate}% お得！
               </div>
             )}
           </div>
@@ -212,8 +214,8 @@ export default function BottomSheet({ item, onClose }: Props) {
           <div className="space-y-2.5">
             {item.purchase_condition && (
               <div className="flex gap-2 items-start bg-amber-50 p-2.5 rounded-xl border border-amber-100">
-                <span aria-hidden="true" className="text-amber-500 mt-0.5">
-                  ⚠️
+                <span className="text-amber-500 mt-0.5">
+                  <Glyph name="warning" className="w-4 h-4" />
                 </span>
                 <div>
                   <div className="text-[10px] font-bold text-amber-700 mb-0.5">購入条件・備考</div>
@@ -226,7 +228,9 @@ export default function BottomSheet({ item, onClose }: Props) {
 
             {(item.sale_start_date || item.sale_end_date) && (
               <div className="flex gap-2 items-center text-xs text-stone-600 bg-stone-50 p-2.5 rounded-xl">
-                <span aria-hidden="true">📅</span>
+                <span className="text-stone-400">
+                  <Glyph name="calendar" className="w-4 h-4" />
+                </span>
                 <span className="font-medium">
                   販売期間: {item.sale_start_date || "本日"} 〜{" "}
                   {item.sale_end_date ? item.sale_end_date.replace("まで", "") : "未定"}
@@ -236,7 +240,9 @@ export default function BottomSheet({ item, onClose }: Props) {
 
             {item.comment && (
               <div className="flex gap-2 items-start text-xs text-teal-800 bg-teal-50 p-2.5 rounded-xl">
-                <span aria-hidden="true">💡</span>
+                <span className="text-teal-500 mt-0.5">
+                  <Glyph name="bulb" className="w-4 h-4" />
+                </span>
                 <span className="font-medium leading-relaxed">{item.comment}</span>
               </div>
             )}
@@ -250,7 +256,8 @@ export default function BottomSheet({ item, onClose }: Props) {
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-1.5 w-full bg-white border-2 border-stone-200 text-stone-700 font-bold py-2.5 rounded-2xl active:bg-stone-100 transition-colors text-sm"
               >
-                🏪 {item.shop} のチラシを見る ↗
+                <Glyph name="store" className="w-4 h-4 text-rose-500" />
+                {item.shop} のチラシを見る ↗
               </a>
             )}
             <button

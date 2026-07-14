@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import SiteFooter from "./SiteFooter";
+import BrandMark from "./BrandMark";
 import { SITE_URL, SITE_NAME } from "../lib/site";
 
 type Props = {
@@ -31,8 +32,8 @@ export default function DocPage({ title, description, path, children }: Props) {
 
       <div className="max-w-md mx-auto bg-[#faf9f8] min-h-screen shadow-xl">
         <header className="bg-white/80 backdrop-blur-xl border-b border-stone-200 sticky top-0 z-40 p-4">
-          <Link href="/" className="text-sm font-black text-stone-800 flex items-center gap-1">
-            🛒 {SITE_NAME}
+          <Link href="/" className="text-sm font-black text-stone-800 flex items-center gap-1.5">
+            <BrandMark className="w-6 h-6" /> {SITE_NAME}
           </Link>
         </header>
 

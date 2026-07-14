@@ -1,3 +1,4 @@
+import Glyph from "./Glyph";
 import type { PricePoint } from "../lib/types";
 
 type Props = {
@@ -32,7 +33,9 @@ export default function PriceSparkline({ history, avgPrice = 0 }: Props) {
   return (
     <div className="bg-white rounded-2xl p-3 mb-4 border border-stone-100">
       <div className="flex justify-between items-center mb-1">
-        <span className="text-[10px] font-bold text-stone-500">📈 過去30日の価格推移</span>
+        <span className="text-[10px] font-bold text-stone-500 flex items-center gap-1">
+          <Glyph name="trend" className="w-3.5 h-3.5 text-rose-400" /> 過去30日の価格推移
+        </span>
         <span className="text-[10px] text-stone-500">
           {history[0].date} 〜 {history[lastIdx].date}
         </span>

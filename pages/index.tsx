@@ -22,6 +22,9 @@ import DailyCarouselItem from "../components/DailyCarouselItem";
 import StockAccordion from "../components/StockAccordion";
 import HighlightCard from "../components/HighlightCard";
 import GeneralTable, { type SortKey } from "../components/GeneralTable";
+import HeroBanner from "../components/HeroBanner";
+import BrandMark from "../components/BrandMark";
+import SectionHeading from "../components/SectionHeading";
 
 const SAMPLE_DATA: DashboardData = {
   lastUpdated: "取得失敗",
@@ -30,9 +33,6 @@ const SAMPLE_DATA: DashboardData = {
   highlights: [],
   general: [],
 };
-
-// ヘッダーの装飾（外部画像に依存しない絵文字バナー）
-const HERO_EMOJIS = ["🥕", "🍞", "🥚", "🐟", "🍎", "🥬", "🧺", "🥛"];
 
 type Props = {
   data: DashboardData;
@@ -213,29 +213,13 @@ export default function Dashboard({ data: initialData }: Props) {
       <style>{`.no-sb::-webkit-scrollbar{display:none}.no-sb{-ms-overflow-style:none;scrollbar-width:none}`}</style>
 
       <div className="max-w-md mx-auto bg-[#faf9f8] min-h-screen pb-12 shadow-xl relative">
-        {/* ヒーローバナー（外部画像に依存しない自前デザイン） */}
-        <div
-          aria-hidden="true"
-          className="h-44 w-full relative overflow-hidden bg-gradient-to-br from-rose-100 via-amber-50 to-teal-50"
-        >
-          <div className="absolute inset-0 flex flex-wrap items-center justify-center gap-x-7 gap-y-4 px-6 pt-2 pb-16 opacity-70 select-none">
-            {HERO_EMOJIS.map((emoji, i) => (
-              <span
-                key={i}
-                className="text-4xl drop-shadow-sm"
-                style={{ transform: `rotate(${((i % 3) - 1) * 12}deg)` }}
-              >
-                {emoji}
-              </span>
-            ))}
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#faf9f8]"></div>
-        </div>
+        {/* ヒーローバナー（自前のイラストSVG） */}
+        <HeroBanner />
 
         <header className="bg-white/70 backdrop-blur-xl border-b border-stone-200 sticky top-0 z-50 p-4 pb-3 pt-4 -mt-16 rounded-t-3xl">
           <div className="flex justify-between items-center mb-2">
-            <h1 className="text-base font-black text-stone-800 tracking-tight drop-shadow-sm">
-              🛒 北摂マルシェ
+            <h1 className="flex items-center gap-2 text-base font-black text-stone-800 tracking-tight drop-shadow-sm">
+              <BrandMark className="w-7 h-7" /> 北摂マルシェ
             </h1>
             <span className="text-[10px] bg-white/80 text-stone-600 px-2.5 py-1 rounded-full font-bold shadow-sm border border-stone-100">
               本日 {data.lastUpdated} 更新
@@ -248,9 +232,12 @@ export default function Dashboard({ data: initialData }: Props) {
 
         <main className="p-4 space-y-6">
           <section className="bg-white p-4 rounded-3xl shadow-sm border border-stone-100">
-            <h2 className="text-[11px] font-bold text-stone-600 tracking-wider mb-4 flex items-center gap-1">
-              <span aria-hidden="true">🥛</span> 毎日の必需品 1週間底値カレンダー
-            </h2>
+            <SectionHeading
+              variant="calendar"
+              title="毎日の必需品 1週間底値カレンダー"
+              tint="text-teal-700"
+              chipBg="from-teal-400 to-emerald-400"
+            />
             <div className="space-y-4">
               {data.daily.length > 0 ? (
                 data.daily.map((item, i) => (
@@ -289,9 +276,12 @@ export default function Dashboard({ data: initialData }: Props) {
           </div>
 
           <section className="bg-gradient-to-br from-amber-50 to-orange-50/50 p-4 rounded-3xl border border-orange-100 shadow-sm">
-            <h2 className="text-[11px] font-bold text-orange-600 tracking-wider mb-3 flex items-center gap-1">
-              <span aria-hidden="true">🔥</span> 見落とし厳禁！エリア最高目玉品
-            </h2>
+            <SectionHeading
+              variant="flame"
+              title="見落とし厳禁！エリア最高目玉品"
+              tint="text-orange-600"
+              chipBg="from-orange-400 to-rose-400"
+            />
             <div className="space-y-3">
               {filteredHighlights.length > 0 ? (
                 filteredHighlights.map((h, i) => (

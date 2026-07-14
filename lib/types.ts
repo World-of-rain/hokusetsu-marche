@@ -23,6 +23,7 @@ export const ScheduleItemSchema = z.object({
 export const DailyItemSchema = z.object({
   name: z.string(),
   image: z.string().default(""),
+  icon: z.string().default(""),
   schedule: z.array(ScheduleItemSchema),
   category_label: z.string().default(""),
   is_new: z.boolean().default(false),
@@ -39,6 +40,7 @@ export const GeneralItemSchema = z.object({
   day: z.string(),
   warning: z.boolean().default(false),
   image: z.string().default(""),
+  icon: z.string().default(""),
   comment: z.string().default(""),
   category: z.string().default(""),
   is_one_day_sale: z.boolean().default(false),
@@ -80,6 +82,7 @@ export type SelectedItem = {
   shop: string;
   price: number;
   category?: string;
+  icon?: string;
   image?: string;
   avg_price?: number;
   min_price?: number;
