@@ -43,7 +43,7 @@ export default function Dashboard({ data: initialData }: Props) {
   // ビルド時データを初期表示し、表示後にKV（Pages Function）の最新データへ差し替える
   const data = useLiveDashboardData(initialData, DEFAULT_AREA);
 
-  const [currentTab, setCurrentTab] = useState<"today" | "tomorrow">("today");
+  const [currentTab, setCurrentTab] = useState<"today" | "tomorrow" | "week">("today");
   const [searchQuery, setSearchQuery] = useState("");
   const [openAccordion, setOpenAccordion] = useState<number | null>(null);
   const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null); // ボトムシート用
@@ -66,7 +66,8 @@ export default function Dashboard({ data: initialData }: Props) {
   const toggleAccordion = (idx: number) => setOpenAccordion((prev) => (prev === idx ? null : idx));
 
   const filteredHighlights = useMemo(
-    () => data.highlights.filter((h) => h.day === currentTab),
+    // 今週タブでは目玉品は今日・明日分をまとめて表示する
+    () => (currentTab === "week" ? data.highlights : data.highlights.filter((h) => h.day === currentTab)),
     [data.highlights, currentTab]
   );
 
@@ -189,9 +190,12 @@ export default function Dashboard({ data: initialData }: Props) {
   const todayDate = new Date();
   const tomorrowDate = new Date(todayDate);
   tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+  const weekEndDate = new Date(todayDate);
+  weekEndDate.setDate(weekEndDate.getDate() + 6);
   const formatDate = (d: Date) => `${d.getMonth() + 1}/${d.getDate()}`;
   const todayStr = formatDate(todayDate);
   const tomorrowStr = formatDate(tomorrowDate);
+  const weekEndStr = formatDate(weekEndDate);
 
   return (
     <div className="bg-[#f5f4f1] font-sans antialiased text-stone-800 min-h-screen">
@@ -265,20 +269,36 @@ export default function Dashboard({ data: initialData }: Props) {
             onClick={setSelectedItem}
           />
 
-          <div className="flex gap-2.5 bg-stone-100/50 p-1 rounded-3xl">
+          <div className="flex gap-1.5 bg-stone-100/50 p-1 rounded-3xl">
             <button
               onClick={() => setCurrentTab("today")}
               aria-pressed={currentTab === "today"}
               className={tabCls(currentTab === "today")}
             >
-              今日({todayStr})の特売品
+              今日
+              <span className="block text-[9px] font-medium opacity-80 leading-none mt-0.5">
+                {todayStr}
+              </span>
             </button>
             <button
               onClick={() => setCurrentTab("tomorrow")}
               aria-pressed={currentTab === "tomorrow"}
               className={tabCls(currentTab === "tomorrow")}
             >
-              明日({tomorrowStr})の特売品
+              明日
+              <span className="block text-[9px] font-medium opacity-80 leading-none mt-0.5">
+                {tomorrowStr}
+              </span>
+            </button>
+            <button
+              onClick={() => setCurrentTab("week")}
+              aria-pressed={currentTab === "week"}
+              className={tabCls(currentTab === "week")}
+            >
+              今週
+              <span className="block text-[9px] font-medium opacity-80 leading-none mt-0.5">
+                〜{weekEndStr}
+              </span>
             </button>
           </div>
 
@@ -296,7 +316,8 @@ export default function Dashboard({ data: initialData }: Props) {
                 ))
               ) : (
                 <p className="text-[11px] text-orange-500 text-center py-3 bg-white/50 rounded-xl">
-                  {currentTab === "today" ? "今日" : "明日"}の目玉品はありません
+                  {currentTab === "today" ? "今日" : currentTab === "tomorrow" ? "明日" : "今週"}
+                  の目玉品はありません
                 </p>
               )}
             </div>

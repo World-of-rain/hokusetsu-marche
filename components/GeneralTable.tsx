@@ -11,7 +11,7 @@ type Props = {
   setSearchQuery: (v: string) => void;
   sortKey: SortKey;
   setSortKey: (v: SortKey) => void;
-  currentTab: "today" | "tomorrow";
+  currentTab: "today" | "tomorrow" | "week";
   storeFilter: string;
   setStoreFilter: (v: string) => void;
   availableStores: string[];
@@ -107,29 +107,24 @@ export default function GeneralTable({
               </button>
             ))}
           </div>
-          <div className="flex gap-1.5 items-center overflow-x-auto no-sb pb-1">
-            <button
-              onClick={() => setCategoryFilter("all")}
-              aria-pressed={categoryFilter === "all"}
-              className={`flex-shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition-colors ${
-                categoryFilter === "all" ? "bg-rose-500 text-white" : "bg-stone-100 text-stone-600"
+          <div className="flex gap-1.5 items-center">
+            <select
+              value={availableCategories.includes(categoryFilter) ? categoryFilter : "all"}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              aria-label="ジャンルで絞り込み"
+              className={`flex-1 min-w-0 text-[11px] font-bold rounded-full px-3 py-1.5 border transition-colors focus:outline-none ${
+                categoryFilter !== "all"
+                  ? "bg-rose-500 text-white border-rose-500"
+                  : "bg-stone-100 text-stone-600 border-stone-100"
               }`}
             >
-              すべてのジャンル
-            </button>
-            {availableCategories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setCategoryFilter(cat)}
-                aria-pressed={categoryFilter === cat}
-                className={`flex-shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition-colors ${
-                  categoryFilter === cat ? "bg-rose-500 text-white" : "bg-stone-100 text-stone-600"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-            <div className="w-px h-4 bg-stone-300 mx-1 flex-shrink-0"></div>
+              <option value="all">すべてのジャンル</option>
+              {availableCategories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
             <button
               onClick={() => setOnlyOneDay(!onlyOneDay)}
               aria-pressed={onlyOneDay}
@@ -146,15 +141,15 @@ export default function GeneralTable({
       </div>
 
       <div className="overflow-x-auto relative z-10">
-        <table className="w-full text-left border-collapse">
+        <table className="w-full text-left border-collapse table-fixed">
           <thead>
             <tr className="bg-stone-50 text-[10px] font-bold text-stone-500 border-b border-stone-100">
-              <th className="p-2 pl-3 w-8">
+              <th className="p-2 pl-3 w-7">
                 <span className="sr-only">お気に入り</span>
               </th>
               <th className="p-3 pl-1">商品名</th>
-              <th className="p-3 text-right">最安値</th>
-              <th className="p-3 pr-4 text-right">取扱店</th>
+              <th className="p-2 text-right w-14">最安値</th>
+              <th className="p-2 pr-3 text-right w-[72px]">取扱店</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-stone-50">
@@ -194,7 +189,7 @@ export default function GeneralTable({
                         {isFavorite ? "★" : "☆"}
                       </button>
                     </td>
-                    <td className="p-3 pl-1 text-xs">
+                    <td className="p-2 pl-1 text-xs">
                       <div className="flex items-center gap-2">
                         <ProductImage
                           name={item.name}
@@ -204,36 +199,37 @@ export default function GeneralTable({
                           className="w-8 h-8 rounded-lg flex-shrink-0"
                         />
                         <div className="min-w-0">
-                      <div className="flex items-center flex-wrap gap-1">
-                        <span className="font-bold text-stone-700">{item.name}</span>
-                        {item.is_new && (
-                          <span className="bg-amber-400 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
-                            NEW
-                          </span>
-                        )}
-                        {item.is_one_day_sale && (
-                          <span className="bg-teal-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
-                            本日限り
-                          </span>
-                        )}
-                        {!item.is_one_day_sale && item.sale_end_date && (
-                          <span className="text-stone-500 text-[10px] font-medium ml-1">
-                            {item.sale_end_date}
-                          </span>
-                        )}
-                      </div>
-                      {item.warning && currentTab === "today" && (
-                        <span className="inline-flex items-center gap-1 mt-1 text-[10px] bg-rose-100 text-rose-700 font-bold px-2 py-0.5 rounded-full animate-pulse">
-                          <Glyph name="stop" className="w-3 h-3" /> 明日まで待って！
-                        </span>
-                      )}
+                          <div className="flex items-baseline flex-wrap gap-x-1 gap-y-0.5">
+                            <span className="font-bold text-stone-700 leading-snug">{item.name}</span>
+                            {item.is_new && (
+                              <span className="bg-amber-400 text-white text-[8px] leading-none px-1 py-0.5 rounded font-bold align-middle">
+                                NEW
+                              </span>
+                            )}
+                            {item.is_one_day_sale && (
+                              <span className="bg-teal-500 text-white text-[8px] leading-none px-1 py-0.5 rounded font-bold align-middle">
+                                本日限り
+                              </span>
+                            )}
+                            {!item.is_one_day_sale && item.sale_end_date && (
+                              <span className="text-stone-400 text-[9px] font-medium">
+                                {item.sale_end_date}
+                              </span>
+                            )}
+                          </div>
+                          {item.warning && currentTab === "today" && (
+                            <span className="inline-flex items-center gap-0.5 mt-0.5 text-[9px] bg-rose-100 text-rose-700 font-bold px-1.5 py-px rounded-full">
+                              <Glyph name="stop" className="w-2.5 h-2.5" /> 明日まで待って
+                            </span>
+                          )}
                         </div>
                       </div>
                     </td>
-                    <td className="p-3 text-sm font-black text-rose-600 text-right whitespace-nowrap">
-                      {item.price}円
+                    <td className="p-2 text-sm font-black text-rose-600 text-right whitespace-nowrap align-top">
+                      {item.price}
+                      <span className="text-[10px] font-bold">円</span>
                     </td>
-                    <td className="p-3 pr-4 text-[11px] text-stone-600 text-right whitespace-nowrap">
+                    <td className="p-2 pr-3 text-[10px] text-stone-600 text-right align-top whitespace-normal break-words leading-tight">
                       {item.shop}
                     </td>
                   </tr>

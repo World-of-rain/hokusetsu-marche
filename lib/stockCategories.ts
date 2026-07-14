@@ -10,6 +10,7 @@ export function cleanCategoryLabel(s: string): string {
 
 // 表示順（この順に並べ、リストに無いものは末尾）。
 export const STOCK_CATEGORY_ORDER: string[] = [
+  "米",
   "主食・粉物",
   "缶詰・レトルト・インスタント",
   "乾物・海藻",
@@ -24,12 +25,12 @@ export const STOCK_CATEGORY_ORDER: string[] = [
   "キッチン消耗品",
   "オムツ・ベビー",
   "ペット用品",
-  "その他ストック",
 ];
 
 // カテゴリ → 自前SVGアイコンキー（旧ラベルもエイリアスとして受ける）。
 const STOCK_CATEGORY_ICON: Record<string, IconKey> = {
-  "主食・粉物": "rice",
+  米: "rice",
+  "主食・粉物": "noodle",
   "缶詰・レトルト・インスタント": "curry",
   "乾物・海藻": "fish",
   "調味料・油": "seasoning",
@@ -46,7 +47,6 @@ const STOCK_CATEGORY_ICON: Record<string, IconKey> = {
   "オムツ・ベビー": "baby",
   オムツ: "baby",
   ペット用品: "default",
-  その他ストック: "default",
 };
 
 export function stockCategoryIcon(cleanLabel: string): IconKey {
