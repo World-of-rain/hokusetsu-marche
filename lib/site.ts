@@ -14,7 +14,7 @@ export const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@hoku
 
 // トップページが表示するエリアタグ。KV（Pages Function /api/prices/{area}）の
 // 読み出しキーになる。データのエリアに合わせて設定する（環境変数で上書き可）。
-export const DEFAULT_AREA = process.env.NEXT_PUBLIC_DEFAULT_AREA || "toyonaka";
+export const DEFAULT_AREA = process.env.NEXT_PUBLIC_DEFAULT_AREA || "shonai";
 
 // Google AdSense クライアントID（例: ca-pub-1234567890123456）。
 // 設定すると全ページの<head>に審査用・配信用スクリプトが挿入される
