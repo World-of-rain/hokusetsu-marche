@@ -147,6 +147,7 @@ export default function Dashboard({ data: initialData }: Props) {
         comment: minSlot.advice,
         slot_day: minSlot.day,
         price_history: s.price_history,
+        store_url: minSlot.store_url,
       });
     });
     return Object.entries(groups).map(([cat, items]) => ({ cat, items }));

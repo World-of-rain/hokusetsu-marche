@@ -44,6 +44,7 @@ export default function DailyCarouselItem({ item, onClick }: Props) {
             comment: adviceText,
             slot_day: firstMinSlot?.day || "",
             price_history: item.price_history,
+            store_url: firstMinSlot?.store_url || "",
           })
         }
       >
@@ -84,6 +85,7 @@ export default function DailyCarouselItem({ item, onClick }: Props) {
                 comment: s.advice || "",
                 slot_day: s.day,
                 price_history: item.price_history,
+                store_url: s.store_url || "",
               })
             }
             className={`flex-shrink-0 w-[86px] p-2 rounded-2xl border text-center transition-all ${
