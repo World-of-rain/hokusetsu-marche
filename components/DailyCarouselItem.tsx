@@ -1,4 +1,4 @@
-import FoodIcon from "./FoodIcon";
+import ProductImage from "./ProductImage";
 import Glyph from "./Glyph";
 import type { DailyItem, SelectedItem } from "../lib/types";
 
@@ -50,11 +50,11 @@ export default function DailyCarouselItem({ item, onClick }: Props) {
           })
         }
       >
-        <FoodIcon
+        <ProductImage
           name={item.name}
           icon={item.icon}
+          width={120}
           className="w-8 h-8 rounded-xl shadow-sm"
-          padClassName="p-[12%]"
         />
         <div className="flex items-center flex-wrap gap-1">
           <span>{item.name}</span>

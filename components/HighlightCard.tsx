@@ -1,4 +1,4 @@
-import FoodIcon from "./FoodIcon";
+import ProductImage from "./ProductImage";
 import type { GeneralItem, SelectedItem } from "../lib/types";
 
 type Props = {
@@ -15,10 +15,11 @@ export default function HighlightCard({ h, onClick }: Props) {
     >
       <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-orange-400 to-rose-400"></div>
 
-      <FoodIcon
+      <ProductImage
         name={h.name}
         category={h.category}
         icon={h.icon}
+        width={160}
         className="w-12 h-12 rounded-xl flex-shrink-0 ml-1 shadow-sm"
       />
 

@@ -1,4 +1,4 @@
-import FoodIcon from "./FoodIcon";
+import ProductImage from "./ProductImage";
 import SectionHeading from "./SectionHeading";
 import Glyph from "./Glyph";
 import type { GeneralItem, SelectedItem } from "../lib/types";
@@ -196,12 +196,12 @@ export default function GeneralTable({
                     </td>
                     <td className="p-3 pl-1 text-xs">
                       <div className="flex items-center gap-2">
-                        <FoodIcon
+                        <ProductImage
                           name={item.name}
                           category={item.category}
                           icon={item.icon}
+                          width={120}
                           className="w-8 h-8 rounded-lg flex-shrink-0"
-                          padClassName="p-[12%]"
                         />
                         <div className="min-w-0">
                       <div className="flex items-center flex-wrap gap-1">

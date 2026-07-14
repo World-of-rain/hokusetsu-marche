@@ -1,5 +1,5 @@
 import SectionHeading from "./SectionHeading";
-import FoodIcon from "./FoodIcon";
+import ProductImage from "./ProductImage";
 import type { SelectedItem, StockGroup } from "../lib/types";
 
 type Props = {
@@ -39,10 +39,10 @@ export default function StockAccordion({ stocks, openIdx, onToggle, onClick }: P
                 }`}
               >
                 <span className="flex items-center gap-2 font-bold text-stone-700">
-                  <FoodIcon
+                  <ProductImage
                     name={catLabel}
+                    width={120}
                     className="w-7 h-7 rounded-lg flex-shrink-0"
-                    padClassName="p-[14%]"
                   />
                   {catLabel}
                 </span>

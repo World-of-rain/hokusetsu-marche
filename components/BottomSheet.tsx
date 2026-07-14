@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import FoodIcon from "./FoodIcon";
+import ProductImage from "./ProductImage";
 import Glyph from "./Glyph";
 import PriceSparkline from "./PriceSparkline";
 import { getStoreUrl } from "../lib/storeLinks";
@@ -150,10 +150,11 @@ export default function BottomSheet({ item, onClose }: Props) {
           <div className="w-10 h-1.5 bg-stone-300 rounded-full mx-auto mb-3"></div>
 
           <div className="flex gap-3 items-center">
-            <FoodIcon
+            <ProductImage
               name={item.name}
               category={item.category}
               icon={item.icon}
+              width={200}
               className="w-14 h-14 rounded-2xl shadow-sm flex-shrink-0"
             />
             <div className="min-w-0">
