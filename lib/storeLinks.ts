@@ -22,10 +22,19 @@ export const STORE_LINKS: { name: string; url: string }[] = [
   },
 ];
 
+// 全角/半角スペースを除去して照合の表記ゆれ（例:「ライフ 庄内店」と「ライフ庄内店」）を吸収する
+function normalizeStoreName(s: string): string {
+  return s.replace(/[\s　]/g, "");
+}
+
 export function getStoreUrl(shop: string | undefined): string | null {
   if (!shop || shop === "-") return null;
+  const target = normalizeStoreName(shop);
   const hit =
-    STORE_LINKS.find((s) => s.name === shop) ||
-    STORE_LINKS.find((s) => shop.includes(s.name) || s.name.includes(shop));
+    STORE_LINKS.find((s) => normalizeStoreName(s.name) === target) ||
+    STORE_LINKS.find((s) => {
+      const n = normalizeStoreName(s.name);
+      return target.includes(n) || n.includes(target);
+    });
   return hit ? hit.url : null;
 }

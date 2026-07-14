@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import EmojiIcon from "./EmojiIcon";
 import PriceSparkline from "./PriceSparkline";
 import { getStoreUrl } from "../lib/storeLinks";
@@ -9,17 +9,33 @@ type Props = {
   onClose: () => void;
 };
 
-// 商品タップ時の詳細情報モーダル
+const CLOSE_DRAG_THRESHOLD = 110; // これ以上下にドラッグしたら閉じる（px）
+
+// 商品タップ時の詳細情報モーダル（ボトムシート）
 export default function BottomSheet({ item, onClose }: Props) {
   const sheetRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  // 下スワイプで閉じるためのドラッグ状態
+  const [dragY, setDragY] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const startYRef = useRef(0);
+  const dragYRef = useRef(0); // しきい値判定はstateの遅延を避けてrefで行う
+  const activeRef = useRef(false);
 
   // アクセシビリティ: Escapeで閉じる・開いた時に閉じるボタンへフォーカス・
   // Tabキーのフォーカスをシート内に閉じ込める・背景スクロールをロック
   useEffect(() => {
     if (!item) return;
 
-    closeButtonRef.current?.focus();
+    setDragY(0);
+    setDragging(false);
+    dragYRef.current = 0;
+    // 開いた時は必ず最上部を表示する。閉じるボタンへのフォーカスは preventScroll を
+    // 付けて、シートが下に自動スクロールして上部（商品名）が見切れるのを防ぐ
+    // （これがないと下スワイプ閉じの scrollTop 判定も誤作動する）。
+    if (sheetRef.current) sheetRef.current.scrollTop = 0;
+    closeButtonRef.current?.focus({ preventScroll: true });
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
@@ -61,6 +77,44 @@ export default function BottomSheet({ item, onClose }: Props) {
 
   const storeUrl = getStoreUrl(item.shop);
 
+  // 下スワイプで閉じる。シートが最上部までスクロールされている時だけドラッグ開始する
+  // （内側のスクロールと競合させないため）。ポインタキャプチャで、シートが下に
+  // 動いてもmove/upイベントがシートに届き続けるようにする。
+  const onPointerDown = (e: React.PointerEvent) => {
+    if ((sheetRef.current?.scrollTop ?? 0) > 0) return;
+    activeRef.current = true;
+    startYRef.current = e.clientY;
+    dragYRef.current = 0;
+    setDragging(true);
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // 一部環境で未対応でも致命的ではない
+    }
+  };
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!activeRef.current) return;
+    const delta = e.clientY - startYRef.current;
+    dragYRef.current = delta > 0 ? delta : 0;
+    setDragY(dragYRef.current);
+  };
+  const endDrag = (e: React.PointerEvent) => {
+    if (!activeRef.current) return;
+    activeRef.current = false;
+    setDragging(false);
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      // no-op
+    }
+    if (dragYRef.current > CLOSE_DRAG_THRESHOLD) {
+      onClose();
+    } else {
+      dragYRef.current = 0;
+      setDragY(0);
+    }
+  };
+
   return (
     <>
       {/* 背景のオーバーレイ */}
@@ -76,20 +130,33 @@ export default function BottomSheet({ item, onClose }: Props) {
         role="dialog"
         aria-modal="true"
         aria-label={`${item.name}の詳細`}
-        className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl z-[101] p-5 pb-8 shadow-2xl transform transition-transform max-w-md mx-auto max-h-[90vh] overflow-y-auto"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        style={{
+          transform: dragY ? `translateY(${dragY}px)` : undefined,
+          transition: dragging ? "none" : "transform 0.25s ease",
+          overscrollBehavior: "contain",
+          touchAction: "pan-y",
+        }}
+        className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl z-[101] p-4 pb-6 shadow-2xl max-w-md mx-auto max-h-[88dvh] overflow-y-auto"
       >
-        <div className="w-12 h-1.5 bg-stone-200 rounded-full mx-auto mb-4"></div>
+        {/* ドラッグハンドル（下スワイプで閉じられる目印） */}
+        <div className="w-10 h-1.5 bg-stone-300 rounded-full mx-auto mb-3"></div>
 
-        <div className="flex gap-4 items-start mb-4">
+        <div className="flex gap-3 items-center mb-3">
           <EmojiIcon
             name={item.name}
             category={item.category}
-            className="w-16 h-16 rounded-2xl shadow-sm flex-shrink-0"
-            emojiClassName="text-3xl"
+            className="w-12 h-12 rounded-2xl shadow-sm flex-shrink-0"
+            emojiClassName="text-2xl"
           />
-          <div>
-            <h3 className="font-black text-stone-800 text-lg leading-tight">{item.name}</h3>
-            <p className="text-stone-600 text-xs mt-1">
+          <div className="min-w-0">
+            <h3 className="font-black text-stone-800 text-base leading-tight truncate">
+              {item.name}
+            </h3>
+            <p className="text-stone-600 text-xs mt-0.5">
               {item.shop}
               {item.slot_day && (
                 <span className="ml-1.5 bg-stone-100 text-stone-600 text-[10px] font-bold px-2 py-0.5 rounded-full">
@@ -100,30 +167,30 @@ export default function BottomSheet({ item, onClose }: Props) {
           </div>
         </div>
 
-        <div className="bg-[#faf9f8] rounded-2xl p-4 mb-4 border border-stone-100">
-          <div className="flex justify-between items-end mb-2">
+        <div className="bg-[#faf9f8] rounded-2xl p-3 mb-3 border border-stone-100">
+          <div className="flex justify-between items-end mb-1.5">
             <span className="text-stone-600 text-xs font-bold">特売価格</span>
             <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-black text-rose-600 leading-none">{item.price}</span>
-              <span className="text-rose-600 font-bold">円</span>
+              <span className="text-2xl font-black text-rose-600 leading-none">{item.price}</span>
+              <span className="text-rose-600 font-bold text-sm">円</span>
             </div>
           </div>
 
           {avgPrice > 0 && (
-            <div className="flex justify-between items-center py-2 border-t border-stone-200/60 border-dashed">
+            <div className="flex justify-between items-center py-1.5 border-t border-stone-200/60 border-dashed">
               <span className="text-stone-600 text-[11px]">過去の平均価格</span>
               <span className="text-stone-700 text-xs font-bold">{avgPrice}円</span>
             </div>
           )}
           {minPrice > 0 && (
-            <div className="flex justify-between items-center py-2 border-t border-stone-200/60 border-dashed">
+            <div className="flex justify-between items-center py-1.5 border-t border-stone-200/60 border-dashed">
               <span className="text-stone-600 text-[11px]">過去最安値</span>
               <span className="text-stone-700 text-xs font-bold">{minPrice}円</span>
             </div>
           )}
 
           {discountRate > 0 && (
-            <div className="mt-2 bg-rose-100 text-rose-700 text-xs font-bold text-center py-1.5 rounded-xl">
+            <div className="mt-1.5 bg-rose-100 text-rose-700 text-xs font-bold text-center py-1.5 rounded-xl">
               平均より {discountRate}% お得！🎉
             </div>
           )}
@@ -132,9 +199,9 @@ export default function BottomSheet({ item, onClose }: Props) {
         {/* 価格推移グラフ（主要セクションの商品のみ price_history が入っている） */}
         <PriceSparkline history={item.price_history} avgPrice={avgPrice} />
 
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {item.purchase_condition && (
-            <div className="flex gap-2 items-start bg-amber-50 p-3 rounded-xl border border-amber-100">
+            <div className="flex gap-2 items-start bg-amber-50 p-2.5 rounded-xl border border-amber-100">
               <span aria-hidden="true" className="text-amber-500 mt-0.5">
                 ⚠️
               </span>
@@ -146,7 +213,7 @@ export default function BottomSheet({ item, onClose }: Props) {
           )}
 
           {(item.sale_start_date || item.sale_end_date) && (
-            <div className="flex gap-2 items-center text-xs text-stone-600 bg-stone-50 p-3 rounded-xl">
+            <div className="flex gap-2 items-center text-xs text-stone-600 bg-stone-50 p-2.5 rounded-xl">
               <span aria-hidden="true">📅</span>
               <span className="font-medium">
                 販売期間: {item.sale_start_date || "本日"} 〜{" "}
@@ -156,28 +223,28 @@ export default function BottomSheet({ item, onClose }: Props) {
           )}
 
           {item.comment && (
-            <div className="flex gap-2 items-start text-xs text-teal-800 bg-teal-50 p-3 rounded-xl">
+            <div className="flex gap-2 items-start text-xs text-teal-800 bg-teal-50 p-2.5 rounded-xl">
               <span aria-hidden="true">💡</span>
               <span className="font-medium leading-relaxed">{item.comment}</span>
             </div>
           )}
         </div>
 
-        <div className="mt-6 space-y-3">
+        <div className="mt-5 space-y-2.5">
           {storeUrl && (
             <a
               href={storeUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1.5 w-full bg-white border-2 border-stone-200 text-stone-700 font-bold py-3 rounded-2xl active:bg-stone-100 transition-colors"
+              className="flex items-center justify-center gap-1.5 w-full bg-white border-2 border-stone-200 text-stone-700 font-bold py-2.5 rounded-2xl active:bg-stone-100 transition-colors text-sm"
             >
-              🏪 {item.shop} のチラシページを開く ↗
+              🏪 {item.shop} のチラシを見る ↗
             </a>
           )}
           <button
             ref={closeButtonRef}
             onClick={onClose}
-            className="w-full bg-stone-800 text-white font-bold py-3.5 rounded-2xl active:bg-stone-700 transition-colors"
+            className="w-full bg-stone-800 text-white font-bold py-3 rounded-2xl active:bg-stone-700 transition-colors"
           >
             閉じる
           </button>
