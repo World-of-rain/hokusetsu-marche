@@ -25,6 +25,7 @@ import GeneralTable, { type SortKey } from "../components/GeneralTable";
 import HeroBanner from "../components/HeroBanner";
 import BrandMark from "../components/BrandMark";
 import SectionHeading from "../components/SectionHeading";
+import { cleanCategoryLabel, stockOrderIndex } from "../lib/stockCategories";
 
 const SAMPLE_DATA: DashboardData = {
   lastUpdated: "取得失敗",
@@ -148,9 +149,15 @@ export default function Dashboard({ data: initialData }: Props) {
         slot_day: minSlot.day,
         price_history: s.price_history,
         store_url: minSlot.store_url,
+        icon: s.icon,
       });
     });
-    return Object.entries(groups).map(([cat, items]) => ({ cat, items }));
+    return Object.entries(groups)
+      .map(([cat, items]) => ({ cat, items }))
+      .sort(
+        (a, b) =>
+          stockOrderIndex(cleanCategoryLabel(a.cat)) - stockOrderIndex(cleanCategoryLabel(b.cat))
+      );
   }, [data.stocks]);
 
   // 検索エンジン向けの構造化データ（掲載中の特売品をItemListとして出力）

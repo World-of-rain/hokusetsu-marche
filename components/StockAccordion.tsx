@@ -1,5 +1,7 @@
 import SectionHeading from "./SectionHeading";
+import FoodIcon from "./FoodIcon";
 import ProductImage from "./ProductImage";
+import { cleanCategoryLabel, stockCategoryIcon } from "../lib/stockCategories";
 import type { SelectedItem, StockGroup } from "../lib/types";
 
 type Props = {
@@ -23,8 +25,8 @@ export default function StockAccordion({ stocks, openIdx, onToggle, onClick }: P
         {stocks.map((s, i) => {
           const hasItem = s.items.length > 0;
           const isOpen = openIdx === i;
-          // バックエンドのラベルに残る先頭絵文字を除去（アイコンはFoodIconで表現する）
-          const catLabel = s.cat.replace(/^[^\p{L}\p{N}]+/u, "");
+          // バックエンドのラベルに残る先頭絵文字を除去し、カテゴリ専用アイコンを当てる
+          const catLabel = cleanCategoryLabel(s.cat);
           return (
             <div
               key={i}
@@ -39,10 +41,11 @@ export default function StockAccordion({ stocks, openIdx, onToggle, onClick }: P
                 }`}
               >
                 <span className="flex items-center gap-2 font-bold text-stone-700">
-                  <ProductImage
+                  <FoodIcon
                     name={catLabel}
-                    width={120}
+                    icon={stockCategoryIcon(catLabel)}
                     className="w-7 h-7 rounded-lg flex-shrink-0"
+                    padClassName="p-[14%]"
                   />
                   {catLabel}
                 </span>
@@ -69,7 +72,13 @@ export default function StockAccordion({ stocks, openIdx, onToggle, onClick }: P
                       className="flex justify-between items-center py-1.5 border-b border-stone-100 last:border-0 cursor-pointer active:bg-stone-100"
                       onClick={() => onClick(item)}
                     >
-                      <div className="flex items-center flex-wrap gap-1 mr-2">
+                      <div className="flex items-center flex-wrap gap-1.5 mr-2">
+                        <ProductImage
+                          name={item.name}
+                          icon={item.icon}
+                          width={100}
+                          className="w-6 h-6 rounded-md flex-shrink-0"
+                        />
                         <span className="font-medium text-stone-600">{item.name}</span>
                         {item.is_new && (
                           <span className="bg-amber-400 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
