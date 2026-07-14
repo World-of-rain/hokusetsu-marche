@@ -10,6 +10,7 @@ import {
   SITE_URL,
   SITE_TITLE,
   SITE_DESCRIPTION,
+  DEFAULT_AREA,
   ADSENSE_SLOT_TOP,
   ADSENSE_SLOT_BOTTOM,
 } from "../lib/site";
@@ -39,7 +40,7 @@ type Props = {
 
 export default function Dashboard({ data: initialData }: Props) {
   // ビルド時データを初期表示し、表示後にKV（Pages Function）の最新データへ差し替える
-  const data = useLiveDashboardData(initialData);
+  const data = useLiveDashboardData(initialData, DEFAULT_AREA);
 
   const [currentTab, setCurrentTab] = useState<"today" | "tomorrow">("today");
   const [searchQuery, setSearchQuery] = useState("");

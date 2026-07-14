@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /api/
 
-Sitemap: https://hokusetsu-marche.pages.dev/sitemap.xml
+Sitemap: https://www.hokusetsu-marche.com/sitemap.xml
