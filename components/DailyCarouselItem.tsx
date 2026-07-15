@@ -47,6 +47,9 @@ export default function DailyCarouselItem({ item, onClick }: Props) {
             price_history: item.price_history,
             store_url: firstMinSlot?.store_url || "",
             icon: item.icon,
+            item_id: firstMinSlot?.item_id,
+            image_hash: firstMinSlot?.image_hash,
+            anchor_id: firstMinSlot?.anchor_id,
           })
         }
       >
@@ -90,6 +93,9 @@ export default function DailyCarouselItem({ item, onClick }: Props) {
                 price_history: item.price_history,
                 store_url: s.store_url || "",
                 icon: item.icon,
+                item_id: s.item_id,
+                image_hash: s.image_hash,
+                anchor_id: s.anchor_id,
               })
             }
             className={`flex-shrink-0 w-[86px] p-2 rounded-2xl border text-center transition-all ${

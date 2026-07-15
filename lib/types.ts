@@ -18,6 +18,9 @@ export const ScheduleItemSchema = z.object({
   is_new: z.boolean().default(false),
   purchase_condition: z.string().default(""),
   store_url: z.string().default(""),
+  item_id: z.number().default(0),
+  image_hash: z.string().default(""),
+  anchor_id: z.string().default(""),
 });
 
 export const DailyItemSchema = z.object({
@@ -52,6 +55,9 @@ export const GeneralItemSchema = z.object({
   min_price: z.number().default(0),
   price_history: z.array(PricePointSchema).default([]),
   store_url: z.string().default(""),
+  item_id: z.number().default(0),
+  image_hash: z.string().default(""),
+  anchor_id: z.string().default(""),
 });
 
 export const DashboardResponseSchema = z.object({
@@ -93,6 +99,9 @@ export type SelectedItem = {
   slot_day?: string;
   price_history?: PricePoint[];
   store_url?: string;
+  item_id?: number;
+  image_hash?: string;
+  anchor_id?: string;
 };
 
 /** ストックアコーディオンのグループ */

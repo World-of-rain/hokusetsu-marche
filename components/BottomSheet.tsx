@@ -3,6 +3,7 @@ import ProductImage from "./ProductImage";
 import Glyph from "./Glyph";
 import PriceSparkline from "./PriceSparkline";
 import { getStoreUrl } from "../lib/storeLinks";
+import { REPORT_REASONS, submitReport, type ReportReason } from "../lib/report";
 import type { SelectedItem } from "../lib/types";
 
 type Props = {
@@ -25,6 +26,12 @@ export default function BottomSheet({ item, onClose }: Props) {
   const dragYRef = useRef(0); // しきい値判定はstateの遅延を避けてrefで行う
   const activeRef = useRef(false);
 
+  // 情報の誤り通報
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportReason, setReportReason] = useState<ReportReason | null>(null);
+  const [reportComment, setReportComment] = useState("");
+  const [reportStatus, setReportStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
+
   // アクセシビリティ: Escapeで閉じる・開いた時に閉じるボタンへフォーカス・
   // Tabキーのフォーカスをシート内に閉じ込める・背景スクロールをロック
   useEffect(() => {
@@ -33,6 +40,10 @@ export default function BottomSheet({ item, onClose }: Props) {
     setDragY(0);
     setDragging(false);
     dragYRef.current = 0;
+    setReportOpen(false);
+    setReportReason(null);
+    setReportComment("");
+    setReportStatus("idle");
     // 開いた時は必ず本文を最上部に戻す。閉じるボタンへのフォーカスは preventScroll を
     // 付けて、本文が下に自動スクロールするのを防ぐ。
     if (bodyRef.current) bodyRef.current.scrollTop = 0;
@@ -78,6 +89,13 @@ export default function BottomSheet({ item, onClose }: Props) {
 
   // バックエンド（config.yaml）由来のURLを最優先。無ければフロントの店舗一覧で補完する。
   const storeUrl = item.store_url || getStoreUrl(item.shop);
+
+  const handleSubmitReport = async () => {
+    if (!reportReason || reportStatus === "sending") return;
+    setReportStatus("sending");
+    const ok = await submitReport(item, reportReason, reportComment);
+    setReportStatus(ok ? "done" : "error");
+  };
 
   // 下スワイプで閉じる。ヘッダー（ハンドル部）を掴んだ時は常に、本文を掴んだ時は
   // 本文が最上部までスクロール済みの時だけドラッグを開始する（内側スクロールと競合させない）。
@@ -268,6 +286,73 @@ export default function BottomSheet({ item, onClose }: Props) {
             >
               閉じる
             </button>
+          </div>
+
+          {/* 情報の誤り通報（理由を選ぶだけの軽い導線） */}
+          <div className="mt-3 pt-3 border-t border-stone-100">
+            {reportStatus === "done" ? (
+              <p className="flex items-center justify-center gap-1 text-[11px] text-teal-600 font-bold py-1">
+                <Glyph name="sparkle" className="w-3.5 h-3.5" />
+                ご報告ありがとうございます。確認して修正します。
+              </p>
+            ) : !reportOpen ? (
+              <button
+                onClick={() => setReportOpen(true)}
+                className="flex items-center justify-center gap-1 w-full text-[11px] text-stone-400 hover:text-stone-600 font-medium py-1"
+              >
+                <Glyph name="warning" className="w-3 h-3" />
+                この商品の情報が違う場合は報告する
+              </button>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-[11px] font-bold text-stone-600">どこが違いますか？</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {REPORT_REASONS.map((r) => (
+                    <button
+                      key={r.code}
+                      onClick={() => setReportReason(r.code)}
+                      aria-pressed={reportReason === r.code}
+                      className={`text-[11px] font-bold px-2.5 py-1 rounded-full border transition-colors ${
+                        reportReason === r.code
+                          ? "bg-rose-500 text-white border-rose-500"
+                          : "bg-white text-stone-600 border-stone-200"
+                      }`}
+                    >
+                      {r.label}
+                    </button>
+                  ))}
+                </div>
+                <textarea
+                  value={reportComment}
+                  onChange={(e) => setReportComment(e.target.value)}
+                  maxLength={300}
+                  rows={2}
+                  placeholder="補足があれば（任意）"
+                  aria-label="補足（任意）"
+                  className="w-full text-xs border border-stone-200 rounded-xl p-2 focus:outline-none focus:border-rose-400 resize-none"
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setReportOpen(false)}
+                    className="flex-1 text-[11px] font-bold text-stone-500 py-2 rounded-xl bg-stone-100 active:bg-stone-200"
+                  >
+                    やめる
+                  </button>
+                  <button
+                    onClick={handleSubmitReport}
+                    disabled={!reportReason || reportStatus === "sending"}
+                    className="flex-1 text-[11px] font-bold text-white py-2 rounded-xl bg-rose-500 active:bg-rose-600 disabled:opacity-40"
+                  >
+                    {reportStatus === "sending" ? "送信中…" : "報告する"}
+                  </button>
+                </div>
+                {reportStatus === "error" && (
+                  <p className="text-[10px] text-rose-500 text-center">
+                    送信に失敗しました。時間をおいて再度お試しください。
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
