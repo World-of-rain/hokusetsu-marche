@@ -46,10 +46,12 @@ export default function DailyCarouselItem({ item, onClick }: Props) {
             slot_day: firstMinSlot?.day || "",
             price_history: item.price_history,
             store_url: firstMinSlot?.store_url || "",
+            raw_item_name: firstMinSlot?.raw_item_name,
             icon: item.icon,
             item_id: firstMinSlot?.item_id,
             image_hash: firstMinSlot?.image_hash,
             anchor_id: firstMinSlot?.anchor_id,
+            offers: firstMinSlot?.offers,
             report_state: firstMinSlot?.report_state,
           })
         }
@@ -93,11 +95,13 @@ export default function DailyCarouselItem({ item, onClick }: Props) {
                 slot_day: s.day,
                 price_history: item.price_history,
                 store_url: s.store_url || "",
+                raw_item_name: s.raw_item_name,
                 icon: item.icon,
                 item_id: s.item_id,
                 image_hash: s.image_hash,
                 anchor_id: s.anchor_id,
                 report_state: s.report_state,
+                offers: s.offers,
               })
             }
             className={`flex-shrink-0 w-[86px] p-2 rounded-2xl border text-center transition-all ${
@@ -107,12 +111,32 @@ export default function DailyCarouselItem({ item, onClick }: Props) {
             } ${s.price > 0 ? "cursor-pointer active:scale-95" : "opacity-70"}`}
           >
             <div className="text-[10px] text-stone-600 font-medium mb-0.5">{s.day}</div>
-            <div
-              className={`text-[13px] font-black ${s.isMin ? "text-rose-600" : "text-stone-700"}`}
-            >
-              {s.price > 0 ? `${s.price}円` : "-"}
-            </div>
-            <div className="text-[10px] text-stone-500 truncate mt-0.5">{s.shop}</div>
+            {s.price > 0 && s.offers && s.offers.length > 1 ? (
+              // 同じ日に複数店舗で特売 → 全店舗を表示
+              <div className="space-y-0.5">
+                {s.offers.map((o, oi) => (
+                  <div key={oi}>
+                    <div
+                      className={`text-[13px] font-black leading-tight ${
+                        o.price === s.price ? "text-rose-600" : "text-stone-700"
+                      }`}
+                    >
+                      {o.price}円
+                    </div>
+                    <div className="text-[9px] text-stone-500 truncate leading-tight">{o.shop}</div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <>
+                <div
+                  className={`text-[13px] font-black ${s.isMin ? "text-rose-600" : "text-stone-700"}`}
+                >
+                  {s.price > 0 ? `${s.price}円` : "-"}
+                </div>
+                <div className="text-[10px] text-stone-500 truncate mt-0.5">{s.shop}</div>
+              </>
+            )}
 
             {s.isMin && (
               <div className="inline-block mt-1 bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full tracking-wide">

@@ -9,6 +9,16 @@ export const PricePointSchema = z.object({
   price: z.number(),
 });
 
+// 同じ日・同じ商品を扱う1店舗ぶんの特売情報（底値カレンダーの複数店舗表示用）
+export const OfferSchema = z.object({
+  price: z.number(),
+  shop: z.string(),
+  store_url: z.string().default(""),
+  item_id: z.number().default(0),
+  image_hash: z.string().default(""),
+  anchor_id: z.string().default(""),
+});
+
 export const ScheduleItemSchema = z.object({
   day: z.string(),
   price: z.number(),
@@ -18,10 +28,12 @@ export const ScheduleItemSchema = z.object({
   is_new: z.boolean().default(false),
   purchase_condition: z.string().default(""),
   store_url: z.string().default(""),
+  raw_item_name: z.string().default(""),
   item_id: z.number().default(0),
   image_hash: z.string().default(""),
   anchor_id: z.string().default(""),
   report_state: z.string().default(""),
+  offers: z.array(OfferSchema).default([]),
 });
 
 export const DailyItemSchema = z.object({
@@ -56,6 +68,7 @@ export const GeneralItemSchema = z.object({
   min_price: z.number().default(0),
   price_history: z.array(PricePointSchema).default([]),
   store_url: z.string().default(""),
+  raw_item_name: z.string().default(""),
   item_id: z.number().default(0),
   image_hash: z.string().default(""),
   anchor_id: z.string().default(""),
@@ -101,11 +114,15 @@ export type SelectedItem = {
   slot_day?: string;
   price_history?: PricePoint[];
   store_url?: string;
+  raw_item_name?: string;
   item_id?: number;
   image_hash?: string;
   anchor_id?: string;
   report_state?: string;
+  offers?: Offer[];
 };
+
+export type Offer = z.infer<typeof OfferSchema>;
 
 /** ストックアコーディオンのグループ */
 export type StockGroup = {

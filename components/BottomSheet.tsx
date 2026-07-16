@@ -179,6 +179,11 @@ export default function BottomSheet({ item, onClose }: Props) {
               <h3 className="font-black text-stone-800 text-base leading-tight truncate">
                 {item.name}
               </h3>
+              {item.raw_item_name && item.raw_item_name !== item.name && (
+                <p className="text-stone-400 text-[10px] leading-tight mt-0.5 line-clamp-2">
+                  {item.raw_item_name}
+                </p>
+              )}
               <p className="text-stone-600 text-xs mt-0.5">
                 {item.shop}
                 {item.slot_day && (
@@ -240,6 +245,34 @@ export default function BottomSheet({ item, onClose }: Props) {
               </div>
             )}
           </div>
+
+          {/* この日に複数店舗で特売がある場合は全店舗を表示 */}
+          {item.offers && item.offers.length > 1 && (
+            <div className="bg-white rounded-2xl p-3 mb-3 border border-stone-100">
+              <div className="text-stone-600 text-[11px] font-bold mb-1.5">
+                {item.slot_day ? `${item.slot_day}の取扱店` : "この日の取扱店"}
+              </div>
+              <div className="space-y-1">
+                {[...item.offers]
+                  .sort((a, b) => a.price - b.price)
+                  .map((o, oi) => (
+                    <div
+                      key={oi}
+                      className="flex items-center justify-between text-xs py-1 border-b border-stone-50 last:border-0"
+                    >
+                      <span className="text-stone-700 font-medium truncate mr-2">{o.shop}</span>
+                      <span
+                        className={`font-black whitespace-nowrap ${
+                          o.price === item.price ? "text-rose-600" : "text-stone-500"
+                        }`}
+                      >
+                        {o.price}円
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
 
           {/* 価格推移グラフ（主要セクションの商品のみ price_history が入っている） */}
           <PriceSparkline history={item.price_history} avgPrice={avgPrice} />

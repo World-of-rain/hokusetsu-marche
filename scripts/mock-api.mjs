@@ -12,6 +12,11 @@ const SCHEDULE = [
     advice: "",
     is_new: true,
     purchase_condition: "",
+    raw_item_name: "国産たまご Mサイズ 10個入",
+    offers: [
+      { price: 178, shop: "ライフ 庄内店" },
+      { price: 188, shop: "ダイエー 豊中店" },
+    ],
   },
   {
     day: "日(明日)",
