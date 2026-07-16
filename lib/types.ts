@@ -21,6 +21,7 @@ export const ScheduleItemSchema = z.object({
   item_id: z.number().default(0),
   image_hash: z.string().default(""),
   anchor_id: z.string().default(""),
+  report_state: z.string().default(""),
 });
 
 export const DailyItemSchema = z.object({
@@ -58,6 +59,7 @@ export const GeneralItemSchema = z.object({
   item_id: z.number().default(0),
   image_hash: z.string().default(""),
   anchor_id: z.string().default(""),
+  report_state: z.string().default(""),
 });
 
 export const DashboardResponseSchema = z.object({
@@ -102,6 +104,7 @@ export type SelectedItem = {
   item_id?: number;
   image_hash?: string;
   anchor_id?: string;
+  report_state?: string;
 };
 
 /** ストックアコーディオンのグループ */

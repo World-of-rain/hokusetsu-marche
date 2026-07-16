@@ -50,6 +50,7 @@ export default function DailyCarouselItem({ item, onClick }: Props) {
             item_id: firstMinSlot?.item_id,
             image_hash: firstMinSlot?.image_hash,
             anchor_id: firstMinSlot?.anchor_id,
+            report_state: firstMinSlot?.report_state,
           })
         }
       >
@@ -96,6 +97,7 @@ export default function DailyCarouselItem({ item, onClick }: Props) {
                 item_id: s.item_id,
                 image_hash: s.image_hash,
                 anchor_id: s.anchor_id,
+                report_state: s.report_state,
               })
             }
             className={`flex-shrink-0 w-[86px] p-2 rounded-2xl border text-center transition-all ${

@@ -197,6 +197,20 @@ export default function BottomSheet({ item, onClose }: Props) {
           className="flex-1 min-h-0 overflow-y-auto px-4 pb-6"
           style={{ touchAction: "pan-y", overscrollBehavior: "contain" }}
         >
+          {/* 通報の状態（ユーザーへの結果表示） */}
+          {item.report_state === "checking" && (
+            <div className="flex gap-2 items-center text-[11px] text-amber-800 bg-amber-50 border border-amber-100 p-2 rounded-xl mb-3">
+              <Glyph name="clock" className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+              この商品情報にはユーザーからの報告があり、確認中です。
+            </div>
+          )}
+          {item.report_state === "fixed" && (
+            <div className="flex gap-2 items-center text-[11px] text-teal-800 bg-teal-50 border border-teal-100 p-2 rounded-xl mb-3">
+              <Glyph name="sparkle" className="w-3.5 h-3.5 text-teal-500 flex-shrink-0" />
+              ユーザーからの報告を受けて、この商品情報は修正済みです。
+            </div>
+          )}
+
           <div className="bg-[#faf9f8] rounded-2xl p-3 mb-3 border border-stone-100">
             <div className="flex justify-between items-end mb-1.5">
               <span className="text-stone-600 text-xs font-bold">特売価格</span>
@@ -294,6 +308,10 @@ export default function BottomSheet({ item, onClose }: Props) {
               <p className="flex items-center justify-center gap-1 text-[11px] text-teal-600 font-bold py-1">
                 <Glyph name="sparkle" className="w-3.5 h-3.5" />
                 ご報告ありがとうございます。確認して修正します。
+              </p>
+            ) : item.report_state === "checking" ? (
+              <p className="text-[11px] text-stone-400 text-center py-1">
+                この商品への報告はすでに受付済みで、確認中です。
               </p>
             ) : !reportOpen ? (
               <button
