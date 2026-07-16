@@ -6,13 +6,18 @@ export default function Document() {
     <Html lang="ja">
       <Head>
         {/* Google AdSense: サイト検証と広告配信（自動広告）。
-            NEXT_PUBLIC_ADSENSE_CLIENT が設定されている場合のみ挿入される */}
+            ADSENSE_CLIENT（既定値あり）がある場合に挿入される。
+            - meta: AdSense のサイト所有確認（申請時の検証）
+            - script: 広告配信・自動広告 */}
         {ADSENSE_CLIENT && (
-          <script
-            async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
-            crossOrigin="anonymous"
-          />
+          <>
+            <meta name="google-adsense-account" content={ADSENSE_CLIENT} />
+            <script
+              async
+              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
+              crossOrigin="anonymous"
+            />
+          </>
         )}
       </Head>
       <body>

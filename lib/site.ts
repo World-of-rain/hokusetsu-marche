@@ -16,9 +16,11 @@ export const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@hoku
 // 読み出しキーになる。データのエリアに合わせて設定する（環境変数で上書き可）。
 export const DEFAULT_AREA = process.env.NEXT_PUBLIC_DEFAULT_AREA || "shonai";
 
-// Google AdSense クライアントID（例: ca-pub-1234567890123456）。
-// 設定すると全ページの<head>に審査用・配信用スクリプトが挿入される
-export const ADSENSE_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_CLIENT || "";
+// Google AdSense クライアントID（公開情報。HTMLに埋め込まれる）。
+// 設定すると全ページの<head>に審査用・配信用スクリプトと検証メタタグが挿入される。
+// 環境変数で上書き可能だが、既定値を入れておくことで環境変数なしでも申請要件を満たす。
+export const ADSENSE_CLIENT =
+  process.env.NEXT_PUBLIC_ADSENSE_CLIENT || "ca-pub-3893504806371860";
 
 // トップページの広告ユニットのスロットID（AdSense管理画面で発行）。
 // 未設定なら広告枠は描画されない。自動広告のみ使う場合は設定不要。
