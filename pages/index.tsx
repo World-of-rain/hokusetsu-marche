@@ -156,6 +156,9 @@ export default function Dashboard({ data: initialData }: Props) {
         anchor_id: minSlot.anchor_id,
         report_state: minSlot.report_state,
         raw_item_name: minSlot.raw_item_name,
+        photo_url: s.photo_url,
+        jan_code: s.jan_code,
+        product_url: s.product_url,
       });
     });
     return Object.entries(groups)

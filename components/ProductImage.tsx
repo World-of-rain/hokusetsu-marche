@@ -7,33 +7,47 @@ type Props = {
   name: string;
   category?: string;
   icon?: string;
+  /** Yahoo!ショッピング照合による実商品写真URL（あれば最優先で表示） */
+  photoUrl?: string;
   className?: string;
   /** 取得する写真の幅（px）。小さいタイルほど小さく */
   width?: number;
 };
 
-// 商品ビジュアル。カテゴリに合うフリー写真があれば写真を表示し、無い/読み込み失敗時は
-// 自前のSVGイラスト（FoodIcon）へ自動フォールバックする。壊れた画像は決して出さない。
-export default function ProductImage({ name, category, icon, className, width = 200 }: Props) {
+// 商品ビジュアル。優先順位は
+//   ① 実商品写真(photoUrl・Yahoo照合) → ② カテゴリのフリー写真 → ③ 自前SVGイラスト
+// と多段フォールバックし、壊れた画像は決して出さない。
+export default function ProductImage({
+  name,
+  category,
+  icon,
+  photoUrl,
+  className,
+  width = 200,
+}: Props) {
   const key = normalizeIconKey(icon) ?? pickIconKey(name, category);
-  const photo = photoForKey(key, width);
-  const [failed, setFailed] = useState(false);
+  const [failedUrls, setFailedUrls] = useState<string[]>([]);
 
-  if (!photo || failed) {
+  const candidates = [photoUrl, photoForKey(key, width)].filter(
+    (u): u is string => !!u && !failedUrls.includes(u)
+  );
+  const src = candidates[0];
+
+  if (!src) {
     return <FoodIcon name={name} category={category} icon={icon} className={className} />;
   }
 
   return (
-    <div className={`relative overflow-hidden bg-stone-100 ${className ?? ""}`} aria-hidden="true">
+    <div className={`relative overflow-hidden bg-white ${className ?? ""}`} aria-hidden="true">
       {/* 静的エクスポート(output:export)では next/image 最適化は使えないため素の img を使う */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={photo}
+        src={src}
         alt=""
         loading="lazy"
         decoding="async"
-        onError={() => setFailed(true)}
-        className="absolute inset-0 w-full h-full object-cover"
+        onError={() => setFailedUrls((prev) => [...prev, src])}
+        className={`absolute inset-0 w-full h-full ${src === photoUrl ? "object-contain" : "object-cover"}`}
       />
     </div>
   );

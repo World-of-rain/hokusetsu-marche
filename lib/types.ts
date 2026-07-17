@@ -47,6 +47,9 @@ export const DailyItemSchema = z.object({
   avg_price: z.number().default(0),
   min_price: z.number().default(0),
   price_history: z.array(PricePointSchema).default([]),
+  photo_url: z.string().default(""),
+  jan_code: z.string().default(""),
+  product_url: z.string().default(""),
 });
 
 export const GeneralItemSchema = z.object({
@@ -73,6 +76,9 @@ export const GeneralItemSchema = z.object({
   image_hash: z.string().default(""),
   anchor_id: z.string().default(""),
   report_state: z.string().default(""),
+  photo_url: z.string().default(""),
+  jan_code: z.string().default(""),
+  product_url: z.string().default(""),
 });
 
 export const DashboardResponseSchema = z.object({
@@ -120,6 +126,9 @@ export type SelectedItem = {
   anchor_id?: string;
   report_state?: string;
   offers?: Offer[];
+  photo_url?: string;
+  jan_code?: string;
+  product_url?: string;
 };
 
 export type Offer = z.infer<typeof OfferSchema>;

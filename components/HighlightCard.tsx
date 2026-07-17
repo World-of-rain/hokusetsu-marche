@@ -19,6 +19,7 @@ export default function HighlightCard({ h, onClick }: Props) {
         name={h.name}
         category={h.category}
         icon={h.icon}
+        photoUrl={h.photo_url}
         width={160}
         className="w-12 h-12 rounded-xl flex-shrink-0 ml-1 shadow-sm"
       />

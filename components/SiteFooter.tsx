@@ -44,6 +44,17 @@ export default function SiteFooter() {
         掲載価格は各店舗のチラシをもとにAIが自動集計したもので、実際の店頭価格・在庫を保証する
         ものではありません。ご購入前に各店舗の情報をご確認ください。
       </p>
+      {/* Yahoo!ショッピングAPI利用のクレジット表記（規約必須） */}
+      <p className="text-[10px] text-stone-400 mt-2">
+        <a
+          href="https://developer.yahoo.co.jp/sitemap/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-stone-600 underline"
+        >
+          Web Services by Yahoo! JAPAN
+        </a>
+      </p>
       <p className="text-[10px] text-stone-400 mt-2">
         © {year} {SITE_NAME}
       </p>

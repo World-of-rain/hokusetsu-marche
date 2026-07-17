@@ -106,6 +106,23 @@ test("詳細シートから情報の誤りを通報できる（理由選択UI）
   await expect(submit).toBeEnabled();
 });
 
+test("Yahoo照合済み商品はJAN付きの商品リンクとクレジットが表示される", async ({ page }) => {
+  await page.goto("/");
+  // ストックのアコーディオンを開いてスーパードライの詳細を表示
+  await page.getByText("お酒", { exact: true }).click();
+  await page.getByText("スーパードライ").first().click();
+
+  const dialog = page.getByRole("dialog");
+  const yahooLink = dialog.getByRole("link", { name: /Yahoo!ショッピングで商品を見る/ });
+  await expect(yahooLink).toBeVisible();
+  await expect(yahooLink).toHaveAttribute("href", /store\.shopping\.yahoo\.co\.jp/);
+  await expect(dialog.getByText(/JAN 4901004000001/)).toBeVisible();
+
+  // フッターにYahoo APIのクレジット表記（規約必須）
+  await page.getByRole("button", { name: "閉じる" }).click();
+  await expect(page.getByRole("link", { name: "Web Services by Yahoo! JAPAN" })).toBeVisible();
+});
+
 test("日付セルのタップでその日の詳細が開く", async ({ page }) => {
   await page.goto("/");
   // 底値カレンダーの「火」セル（価格あり）をタップ

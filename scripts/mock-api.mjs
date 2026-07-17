@@ -82,6 +82,10 @@ const DATA = {
       avg_price: 1080,
       min_price: 980,
       price_history: HISTORY,
+      // Yahoo照合済みの実商品情報（実写画像・JAN・商品ページ）のモック
+      photo_url: "https://item-shopping.c.yimg.jp/i/g/mock_superdry.jpg",
+      jan_code: "4901004000001",
+      product_url: "https://store.shopping.yahoo.co.jp/mock/superdry.html",
     },
   ],
   highlights: [

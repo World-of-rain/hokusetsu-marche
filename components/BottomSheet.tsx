@@ -172,6 +172,7 @@ export default function BottomSheet({ item, onClose }: Props) {
               name={item.name}
               category={item.category}
               icon={item.icon}
+              photoUrl={item.photo_url}
               width={200}
               className="w-14 h-14 rounded-2xl shadow-sm flex-shrink-0"
             />
@@ -324,6 +325,22 @@ export default function BottomSheet({ item, onClose }: Props) {
               >
                 <Glyph name="store" className="w-4 h-4 text-rose-500" />
                 {item.shop} のチラシを見る ↗
+              </a>
+            )}
+            {item.product_url && (
+              <a
+                href={item.product_url}
+                target="_blank"
+                rel="noopener noreferrer sponsored"
+                className="flex flex-col items-center justify-center w-full bg-white border border-stone-200 text-stone-500 py-2 rounded-2xl active:bg-stone-100 transition-colors"
+              >
+                <span className="text-[11px] font-bold text-stone-600">
+                  Yahoo!ショッピングで商品を見る ↗
+                </span>
+                <span className="text-[9px] text-stone-400 mt-0.5">
+                  商品画像・情報: Yahoo!ショッピング
+                  {item.jan_code ? ` / JAN ${item.jan_code}` : ""}
+                </span>
               </a>
             )}
             <button

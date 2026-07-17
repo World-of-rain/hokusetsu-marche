@@ -195,6 +195,7 @@ export default function GeneralTable({
                           name={item.name}
                           category={item.category}
                           icon={item.icon}
+                          photoUrl={item.photo_url}
                           width={120}
                           className="w-8 h-8 rounded-lg flex-shrink-0"
                         />

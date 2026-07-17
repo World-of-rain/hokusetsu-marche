@@ -53,12 +53,16 @@ export default function DailyCarouselItem({ item, onClick }: Props) {
             anchor_id: firstMinSlot?.anchor_id,
             offers: firstMinSlot?.offers,
             report_state: firstMinSlot?.report_state,
+            photo_url: item.photo_url,
+            jan_code: item.jan_code,
+            product_url: item.product_url,
           })
         }
       >
         <ProductImage
           name={item.name}
           icon={item.icon}
+          photoUrl={item.photo_url}
           width={120}
           className="w-8 h-8 rounded-xl shadow-sm"
         />
@@ -102,6 +106,9 @@ export default function DailyCarouselItem({ item, onClick }: Props) {
                 anchor_id: s.anchor_id,
                 report_state: s.report_state,
                 offers: s.offers,
+                photo_url: item.photo_url,
+                jan_code: item.jan_code,
+                product_url: item.product_url,
               })
             }
             className={`flex-shrink-0 w-[86px] p-2 rounded-2xl border text-center transition-all ${

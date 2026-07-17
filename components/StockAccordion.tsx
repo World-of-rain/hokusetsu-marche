@@ -76,6 +76,7 @@ export default function StockAccordion({ stocks, openIdx, onToggle, onClick }: P
                         <ProductImage
                           name={item.name}
                           icon={item.icon}
+                          photoUrl={item.photo_url}
                           width={100}
                           className="w-6 h-6 rounded-md flex-shrink-0"
                         />
