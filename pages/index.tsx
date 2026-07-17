@@ -105,6 +105,17 @@ export default function Dashboard({ data: initialData }: Props) {
         const favDiff = Number(favorites.includes(b.name)) - Number(favorites.includes(a.name));
         if (favDiff !== 0) return favDiff;
         if (sortKey === "price") return a.price - b.price;
+        if (sortKey === "unit_price") {
+          // 単価あり商品を先頭に、同一次元（100gあたり/100mlあたり/1個あたり）ごとに
+          // まとめて安い順。単価が出せない商品は末尾に実売価格順で並べる
+          const aHas = a.unit_price > 0 ? 0 : 1;
+          const bHas = b.unit_price > 0 ? 0 : 1;
+          if (aHas !== bHas) return aHas - bHas;
+          if (aHas === 1) return a.price - b.price;
+          const dimDiff = a.unit_dimension.localeCompare(b.unit_dimension);
+          if (dimDiff !== 0) return dimDiff;
+          return a.unit_price - b.unit_price;
+        }
         if (sortKey === "shop") return a.shop.localeCompare(b.shop, "ja");
         if (sortKey === "category") return (a.category || "").localeCompare(b.category || "", "ja");
         return 0;
@@ -156,6 +167,7 @@ export default function Dashboard({ data: initialData }: Props) {
         anchor_id: minSlot.anchor_id,
         report_state: minSlot.report_state,
         raw_item_name: minSlot.raw_item_name,
+        unit_price_text: minSlot.unit_price_text,
         photo_url: s.photo_url,
         jan_code: s.jan_code,
         product_url: s.product_url,

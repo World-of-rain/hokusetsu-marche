@@ -34,6 +34,8 @@ export const ScheduleItemSchema = z.object({
   anchor_id: z.string().default(""),
   report_state: z.string().default(""),
   offers: z.array(OfferSchema).default([]),
+  // 単位あたり価格の注記（例: "100gあたり39.8円"）。出せない商品は空文字
+  unit_price_text: z.string().default(""),
 });
 
 export const DailyItemSchema = z.object({
@@ -79,6 +81,11 @@ export const GeneralItemSchema = z.object({
   photo_url: z.string().default(""),
   jan_code: z.string().default(""),
   product_url: z.string().default(""),
+  // 単位あたり価格。実売価格が主・単価は補助情報（注記表示とソート切替に使う）
+  // unit_dimension: "mass"(円/100g) / "volume"(円/100ml) / "count"(円/個) / ""(単価なし)
+  unit_price: z.number().default(0),
+  unit_dimension: z.string().default(""),
+  unit_price_text: z.string().default(""),
 });
 
 export const DashboardResponseSchema = z.object({
@@ -129,6 +136,7 @@ export type SelectedItem = {
   photo_url?: string;
   jan_code?: string;
   product_url?: string;
+  unit_price_text?: string;
 };
 
 export type Offer = z.infer<typeof OfferSchema>;

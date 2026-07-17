@@ -3,7 +3,7 @@ import SectionHeading from "./SectionHeading";
 import Glyph from "./Glyph";
 import type { GeneralItem, SelectedItem } from "../lib/types";
 
-export type SortKey = "price" | "shop" | "category";
+export type SortKey = "price" | "unit_price" | "shop" | "category";
 
 type Props = {
   items: GeneralItem[];
@@ -78,6 +78,7 @@ export default function GeneralTable({
             className="text-xs font-bold bg-white border border-stone-200 rounded-xl px-2 focus:outline-none text-stone-600"
           >
             <option value="price">価格が安い順</option>
+            <option value="unit_price">単位あたりが安い順</option>
             <option value="shop">お店の順</option>
             <option value="category">ジャンル順</option>
           </select>
@@ -229,6 +230,11 @@ export default function GeneralTable({
                     <td className="p-2 text-sm font-black text-rose-600 text-right whitespace-nowrap align-top">
                       {item.price}
                       <span className="text-[10px] font-bold">円</span>
+                      {item.unit_price_text && (
+                        <div className="text-[8px] font-medium text-stone-400 leading-tight whitespace-normal">
+                          {item.unit_price_text}
+                        </div>
+                      )}
                     </td>
                     <td className="p-2 pr-3 text-[10px] text-stone-600 text-right align-top whitespace-normal break-words leading-tight">
                       {item.shop}

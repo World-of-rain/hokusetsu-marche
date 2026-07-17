@@ -123,6 +123,28 @@ test("Yahoo照合済み商品はJAN付きの商品リンクとクレジットが
   await expect(page.getByRole("link", { name: "Web Services by Yahoo! JAPAN" })).toBeVisible();
 });
 
+test("単位あたり価格が総合リストと詳細シートに注記表示され、単価ソートが選べる", async ({
+  page,
+}) => {
+  await page.goto("/");
+  // 総合リストの価格の下に単価注記が出る
+  await expect(page.getByText("1個あたり128円").first()).toBeVisible();
+  await expect(page.getByText("100gあたり109.3円").first()).toBeVisible();
+
+  // 並び順に「単位あたりが安い順」を選んでもリストが表示され続ける（デフォルトは実売価格）
+  const sortSelect = page.getByRole("combobox", { name: "並び順" });
+  await expect(sortSelect).toHaveValue("price");
+  await sortSelect.selectOption("unit_price");
+  await expect(page.getByText("キャベツ（1玉）").first()).toBeVisible();
+  await expect(page.getByText("豚こま切れ（300g）").first()).toBeVisible();
+  await sortSelect.selectOption("price");
+
+  // 底値カレンダーの卵詳細にも単価注記が出る
+  await page.getByText("卵", { exact: true }).first().click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByText(/1個あたり1[57]\.8円/)).toBeVisible();
+});
+
 test("日付セルのタップでその日の詳細が開く", async ({ page }) => {
   await page.goto("/");
   // 底値カレンダーの「火」セル（価格あり）をタップ
