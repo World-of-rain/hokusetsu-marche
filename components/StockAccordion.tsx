@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import SectionHeading from "./SectionHeading";
 import FoodIcon from "./FoodIcon";
 import ProductImage from "./ProductImage";
@@ -9,10 +10,21 @@ type Props = {
   openIdx: number | null;
   onToggle: (idx: number) => void;
   onClick: (item: SelectedItem) => void;
+  // 見出し直下に挿す表示カテゴリ選択UI（SectionPicker）
+  picker?: ReactNode;
+  // stocksが空のときに出す案内（データなし／カテゴリ未選択で文言を出し分ける）
+  emptyMessage?: string;
 };
 
 // ストック・まとめ買い品のカテゴリ別アコーディオン
-export default function StockAccordion({ stocks, openIdx, onToggle, onClick }: Props) {
+export default function StockAccordion({
+  stocks,
+  openIdx,
+  onToggle,
+  onClick,
+  picker,
+  emptyMessage,
+}: Props) {
   return (
     <section>
       <SectionHeading
@@ -21,6 +33,12 @@ export default function StockAccordion({ stocks, openIdx, onToggle, onClick }: P
         tint="text-amber-700"
         chipBg="from-amber-400 to-yellow-400"
       />
+      {picker}
+      {stocks.length === 0 && emptyMessage && (
+        <p className="text-[11px] text-stone-400 text-center py-3 bg-white rounded-xl border border-stone-100">
+          {emptyMessage}
+        </p>
+      )}
       <div className="space-y-1.5">
         {stocks.map((s, i) => {
           const hasItem = s.items.length > 0;
@@ -69,35 +87,42 @@ export default function StockAccordion({ stocks, openIdx, onToggle, onClick }: P
                   {s.items.map((item, j) => (
                     <div
                       key={j}
-                      className="flex justify-between items-center py-1.5 border-b border-stone-100 last:border-0 cursor-pointer active:bg-stone-100"
+                      className="flex justify-between items-start gap-2 py-1.5 border-b border-stone-100 last:border-0 cursor-pointer active:bg-stone-100"
                       onClick={() => onClick(item)}
                     >
-                      <div className="flex items-center flex-wrap gap-1.5 mr-2">
+                      {/* 商品名側を広くとる（店名は右カラムで価格の下に折り返す） */}
+                      <div className="flex items-start gap-1.5 min-w-0 flex-1">
                         <ProductImage
                           name={item.name}
                           icon={item.icon}
                           photoUrl={item.photo_url}
                           width={100}
-                          className="w-6 h-6 rounded-md flex-shrink-0"
+                          className="w-6 h-6 rounded-md flex-shrink-0 mt-0.5"
                         />
-                        <span className="font-medium text-stone-600">{item.name}</span>
-                        {item.is_new && (
-                          <span className="bg-amber-400 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
-                            NEW
+                        <div className="min-w-0">
+                          <span className="font-medium text-stone-600 leading-snug break-words">
+                            {item.name}
+                            {item.is_new && (
+                              <span className="bg-amber-400 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold ml-1 align-middle whitespace-nowrap">
+                                NEW
+                              </span>
+                            )}
                           </span>
-                        )}
-                        {item.sale_end_date && (
-                          <span className="text-stone-500 text-[10px] font-medium ml-1">
-                            {item.sale_end_date}
-                          </span>
-                        )}
+                          {item.sale_end_date && (
+                            <div className="text-stone-400 text-[10px] font-medium leading-tight">
+                              {item.sale_end_date}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <span className="flex-shrink-0">
+                      <div className="flex-shrink-0 w-[84px] text-right">
                         <strong className="text-rose-600 font-black text-[13px]">
                           {item.price}円
                         </strong>
-                        <span className="text-stone-500 text-[10px] ml-1">({item.shop})</span>
-                      </span>
+                        <div className="text-stone-500 text-[9px] leading-tight break-words">
+                          {item.shop}
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>

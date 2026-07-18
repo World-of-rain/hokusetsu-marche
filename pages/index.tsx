@@ -26,7 +26,15 @@ import GeneralTable, { type SortKey } from "../components/GeneralTable";
 import HeroBanner from "../components/HeroBanner";
 import BrandMark from "../components/BrandMark";
 import SectionHeading from "../components/SectionHeading";
-import { cleanCategoryLabel, stockOrderIndex } from "../lib/stockCategories";
+import SectionPicker from "../components/SectionPicker";
+import {
+  cleanCategoryLabel,
+  stockOrderIndex,
+  STOCK_CATEGORY_ORDER,
+} from "../lib/stockCategories";
+
+// 底値カレンダーの既定表示（ユーザーが未カスタマイズのときに出す定番5品）
+const DEFAULT_DAILY_PICKS = ["卵", "牛乳", "食パン", "納豆", "豆腐"];
 
 const SAMPLE_DATA: DashboardData = {
   lastUpdated: "取得失敗",
@@ -58,6 +66,9 @@ export default function Dashboard({ data: initialData }: Props) {
   );
   const [onlyOneDay, setOnlyOneDay] = useLocalStorageState<boolean>("hm:onlyOneDay", false);
   const [favorites, setFavorites] = useLocalStorageState<string[]>("hm:favorites", []);
+  // 底値カレンダーの表示品目・ストック枠の表示カテゴリ（null = 未カスタマイズ＝既定表示）
+  const [dailyPicks, setDailyPicks] = useLocalStorageState<string[] | null>("hm:dailyPicks", null);
+  const [stockCats, setStockCats] = useLocalStorageState<string[] | null>("hm:stockCats", null);
 
   const toggleFavorite = (name: string) =>
     setFavorites(
@@ -182,6 +193,23 @@ export default function Dashboard({ data: initialData }: Props) {
       );
   }, [data.stocks]);
 
+  // 底値カレンダー: 配信された候補（最大20品）から、ユーザーが選んだ品目だけ表示する。
+  // 未カスタマイズなら定番5品。定番が今週の特売に無い場合は先頭から5品出す
+  const dailyOptions = useMemo(() => data.daily.map((d) => d.name), [data.daily]);
+  const effectiveDailyPicks = dailyPicks ?? DEFAULT_DAILY_PICKS;
+  const visibleDaily = useMemo(() => {
+    const picked = data.daily.filter((d) => effectiveDailyPicks.includes(d.name));
+    if (dailyPicks === null && picked.length === 0) return data.daily.slice(0, 5);
+    return picked;
+  }, [data.daily, dailyPicks, effectiveDailyPicks]);
+
+  // ストック枠: ユーザーが選んだカテゴリのグループだけ表示（未カスタマイズなら全カテゴリ）
+  const effectiveStockCats = stockCats ?? STOCK_CATEGORY_ORDER;
+  const visibleStocks = useMemo(
+    () => formattedStocks.filter((g) => effectiveStockCats.includes(cleanCategoryLabel(g.cat))),
+    [formattedStocks, effectiveStockCats]
+  );
+
   // 検索エンジン向けの構造化データ。
   // - WebSite: サイト名の認識（検索結果のサイト名表示）を安定させる
   // - ItemList: 掲載中の特売品（Yahoo照合済みの商品は実写画像も添える）
@@ -291,11 +319,23 @@ export default function Dashboard({ data: initialData }: Props) {
               tint="text-teal-700"
               chipBg="from-teal-400 to-emerald-400"
             />
+            {dailyOptions.length > 0 && (
+              <SectionPicker
+                label="表示する品目を選ぶ"
+                options={dailyOptions}
+                selected={effectiveDailyPicks.filter((n) => dailyOptions.includes(n))}
+                onChange={setDailyPicks}
+              />
+            )}
             <div className="space-y-4">
-              {data.daily.length > 0 ? (
-                data.daily.map((item, i) => (
+              {visibleDaily.length > 0 ? (
+                visibleDaily.map((item, i) => (
                   <DailyCarouselItem key={i} item={item} onClick={setSelectedItem} />
                 ))
+              ) : data.daily.length > 0 ? (
+                <p className="text-[11px] text-stone-400 text-center py-4">
+                  表示する品目が選ばれていません。右上の「表示する品目を選ぶ」から選択できます。
+                </p>
               ) : (
                 <p className="text-xs text-stone-500 text-center py-4">データがありません</p>
               )}
@@ -305,10 +345,23 @@ export default function Dashboard({ data: initialData }: Props) {
           <AdUnit slot={ADSENSE_SLOT_TOP} />
 
           <StockAccordion
-            stocks={formattedStocks}
+            stocks={visibleStocks}
             openIdx={openAccordion}
             onToggle={toggleAccordion}
             onClick={setSelectedItem}
+            emptyMessage={
+              formattedStocks.length > 0
+                ? "表示するカテゴリが選ばれていません。右上の「表示するカテゴリを選ぶ」から選択できます。"
+                : "今週のストック向け特売はありません。"
+            }
+            picker={
+              <SectionPicker
+                label="表示するカテゴリを選ぶ"
+                options={STOCK_CATEGORY_ORDER}
+                selected={effectiveStockCats}
+                onChange={setStockCats}
+              />
+            }
           />
 
           <div className="flex gap-1.5 bg-stone-100/50 p-1 rounded-3xl">

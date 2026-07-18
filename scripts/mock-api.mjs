@@ -72,6 +72,18 @@ const DATA = {
       min_price: 148,
       price_history: HISTORY,
     },
+    {
+      // 表示品目ピッカーの検証用（既定5品に含まれる2品目）
+      name: "牛乳",
+      image: "https://example.com/milk.jpg",
+      schedule: SCHEDULE,
+      category_label: "",
+      is_new: false,
+      sale_end_date: "",
+      avg_price: 218,
+      min_price: 178,
+      price_history: HISTORY,
+    },
   ],
   stocks: [
     {

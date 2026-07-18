@@ -5,6 +5,8 @@ export default function Document() {
   return (
     <Html lang="ja">
       <Head>
+        {/* Bing Webmaster Tools のサイト所有権確認 */}
+        <meta name="msvalidate.01" content="AC887F1A2D1C5459AF3954683D218571" />
         {/* Google AdSense: サイト検証と広告配信（自動広告）。
             ADSENSE_CLIENT（既定値あり）がある場合に挿入される。
             - meta: AdSense のサイト所有確認（申請時の検証）
