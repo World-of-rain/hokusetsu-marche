@@ -10,11 +10,25 @@ type Props = {
   description: string;
   path: string; // 先頭スラッシュ付き（例: "/privacy"）
   children: ReactNode;
+  // ページ固有の追加構造化データ（例: 使い方ガイドのFAQPage）
+  structuredData?: object[];
 };
 
 // プライバシーポリシー・運営者情報・使い方ガイドなどの読み物ページ用の共通シェル。
-export default function DocPage({ title, description, path, children }: Props) {
+export default function DocPage({ title, description, path, children, structuredData }: Props) {
   const fullTitle = `${title} | ${SITE_NAME}`;
+  // パンくず（トップ → 当ページ）。検索結果のパス表示を安定させる
+  const jsonLd: object[] = [
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: SITE_NAME, item: `${SITE_URL}/` },
+        { "@type": "ListItem", position: 2, name: title, item: `${SITE_URL}${path}` },
+      ],
+    },
+    ...(structuredData || []),
+  ];
   return (
     <div className="bg-[#f5f4f1] font-sans antialiased text-stone-800 min-h-screen">
       <Head>
@@ -24,10 +38,20 @@ export default function DocPage({ title, description, path, children }: Props) {
         <meta name="theme-color" content="#e11d48" />
         <link rel="icon" href="/icons/icon-192.png" type="image/png" />
         <meta property="og:type" content="article" />
+        <meta property="og:site_name" content={SITE_NAME} />
         <meta property="og:title" content={fullTitle} />
         <meta property="og:description" content={description} />
         <meta property="og:url" content={`${SITE_URL}${path}`} />
+        <meta property="og:image" content={`${SITE_URL}/og-image.png`} />
         <meta property="og:locale" content="ja_JP" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={fullTitle} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content={`${SITE_URL}/og-image.png`} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
       </Head>
 
       <div className="max-w-md mx-auto bg-[#faf9f8] min-h-screen shadow-xl">

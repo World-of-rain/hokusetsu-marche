@@ -8,6 +8,7 @@ import { useLocalStorageState } from "../lib/useLocalStorage";
 import { matchesSearch } from "../lib/search";
 import {
   SITE_URL,
+  SITE_NAME,
   SITE_TITLE,
   SITE_DESCRIPTION,
   DEFAULT_AREA,
@@ -181,30 +182,45 @@ export default function Dashboard({ data: initialData }: Props) {
       );
   }, [data.stocks]);
 
-  // 検索エンジン向けの構造化データ（掲載中の特売品をItemListとして出力）
+  // 検索エンジン向けの構造化データ。
+  // - WebSite: サイト名の認識（検索結果のサイト名表示）を安定させる
+  // - ItemList: 掲載中の特売品（Yahoo照合済みの商品は実写画像も添える）
   const jsonLd = useMemo(() => {
     const products = [...initialData.highlights, ...initialData.general].slice(0, 10);
-    return {
-      "@context": "https://schema.org",
-      "@type": "ItemList",
-      name: SITE_TITLE,
-      description: SITE_DESCRIPTION,
-      itemListElement: products.map((p, i) => ({
-        "@type": "ListItem",
-        position: i + 1,
-        item: {
-          "@type": "Product",
-          name: p.name,
-          offers: {
-            "@type": "Offer",
-            price: p.price,
-            priceCurrency: "JPY",
-            availability: "https://schema.org/InStock",
-            seller: { "@type": "Organization", name: p.shop },
+    return [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: SITE_NAME,
+        alternateName: SITE_TITLE,
+        url: `${SITE_URL}/`,
+        description: SITE_DESCRIPTION,
+        inLanguage: "ja",
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        name: SITE_TITLE,
+        description: SITE_DESCRIPTION,
+        itemListElement: products.map((p, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          item: {
+            "@type": "Product",
+            name: p.name,
+            ...(p.photo_url ? { image: p.photo_url } : {}),
+            ...(p.jan_code ? { gtin13: p.jan_code } : {}),
+            offers: {
+              "@type": "Offer",
+              price: p.price,
+              priceCurrency: "JPY",
+              availability: "https://schema.org/InStock",
+              seller: { "@type": "Organization", name: p.shop },
+            },
           },
-        },
-      })),
-    };
+        })),
+      },
+    ];
   }, [initialData]);
 
   const todayDate = new Date();
@@ -230,12 +246,18 @@ export default function Dashboard({ data: initialData }: Props) {
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-title" content="北摂マルシェ" />
         <meta property="og:type" content="website" />
+        <meta property="og:site_name" content={SITE_NAME} />
         <meta property="og:title" content={SITE_TITLE} />
         <meta property="og:description" content={SITE_DESCRIPTION} />
         <meta property="og:url" content={`${SITE_URL}/`} />
         <meta property="og:image" content={`${SITE_URL}/og-image.png`} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
         <meta property="og:locale" content="ja_JP" />
         <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={SITE_TITLE} />
+        <meta name="twitter:description" content={SITE_DESCRIPTION} />
+        <meta name="twitter:image" content={`${SITE_URL}/og-image.png`} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

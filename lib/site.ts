@@ -4,9 +4,11 @@
 // （public/robots.txt と public/sitemap.xml も同じドメインに揃えること）。
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.hokusetsu-marche.com";
 export const SITE_NAME = "北摂マルシェ";
-export const SITE_TITLE = "北摂マルシェ 〜豊南エリア特売情報〜";
+// 検索されやすい地名（豊中・庄内・服部）と行動語（特売・チラシ）をタイトルに含める。
+// ブランド名を先頭に置き、重要語を前方に寄せる
+export const SITE_TITLE = "北摂マルシェ｜豊中市 庄内・服部のスーパー特売・チラシまとめ";
 export const SITE_DESCRIPTION =
-  "豊南エリアのスーパー（ライフ・ダイエー・サタケ・万代など）のチラシ情報をAIが毎日集約。卵・牛乳などの底値カレンダー、今日の目玉品、価格推移グラフでいつ・どこで買うのが一番お得かが一目でわかります。";
+  "大阪府豊中市の庄内・服部エリアのスーパー（ライフ・ダイエー・サタケ・万代など）の特売チラシをAIが毎日自動で集約。卵・牛乳・食パンの底値カレンダー、今日の目玉品、過去30日の価格推移グラフで「いつ・どこで買うのが一番お得か」が一目でわかる無料の特売情報サイトです。";
 
 // お問い合わせ先メールアドレス。Cloudflare Email Routing で受信する。
 // 別のローカルパートにする場合は NEXT_PUBLIC_CONTACT_EMAIL で上書きする。
