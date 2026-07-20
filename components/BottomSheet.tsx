@@ -306,8 +306,14 @@ export default function BottomSheet({ item, onClose }: Props) {
                   <Glyph name="calendar" className="w-4 h-4" />
                 </span>
                 <span className="font-medium">
-                  販売期間: {item.sale_start_date || "本日"} 〜{" "}
-                  {item.sale_end_date ? item.sale_end_date.replace("まで", "") : "未定"}
+                  販売期間:{" "}
+                  {item.sale_start_date
+                    ? `${item.sale_start_date} 〜 ${
+                        item.sale_end_date ? item.sale_end_date.replace("まで", "") : "未定"
+                      }`
+                    : item.sale_end_date
+                      ? `${item.sale_end_date.replace("まで", "")}まで`
+                      : "未定"}
                 </span>
               </div>
             )}
