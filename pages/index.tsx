@@ -179,6 +179,7 @@ export default function Dashboard({ data: initialData }: Props) {
         anchor_id: minSlot.anchor_id,
         report_state: minSlot.report_state,
         raw_item_name: minSlot.raw_item_name,
+        bonus_points: minSlot.bonus_points,
         unit_price_text: minSlot.unit_price_text,
         photo_url: s.photo_url,
         jan_code: s.jan_code,

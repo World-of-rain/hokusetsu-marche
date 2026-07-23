@@ -107,6 +107,11 @@ export default function StockAccordion({
                                 NEW
                               </span>
                             )}
+                            {(item.bonus_points ?? 0) > 0 && (
+                              <span className="bg-violet-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold ml-1 align-middle whitespace-nowrap">
+                                +{item.bonus_points}pt
+                              </span>
+                            )}
                           </span>
                           {item.sale_end_date && (
                             <div className="text-stone-400 text-[10px] font-medium leading-tight">

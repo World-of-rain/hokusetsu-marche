@@ -33,6 +33,11 @@ export default function HighlightCard({ h, onClick }: Props) {
                 NEW
               </span>
             )}
+            {h.bonus_points > 0 && (
+              <span className="bg-violet-500 text-white text-[10px] px-1 py-0.5 rounded-full font-bold">
+                +{h.bonus_points}pt
+              </span>
+            )}
             {!h.is_one_day_sale && h.sale_end_date && (
               <span className="text-stone-500 text-[10px] font-medium ml-1">{h.sale_end_date}</span>
             )}

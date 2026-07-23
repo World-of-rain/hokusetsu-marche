@@ -12,6 +12,7 @@ export default function DailyCarouselItem({ item, onClick }: Props) {
   const todaySlot = item.schedule.find((s) => s.day.includes("今日"));
   const tomorrowSlot = item.schedule.find((s) => s.day.includes("明日"));
   const firstMinSlot = item.schedule.find((s) => s.isMin);
+  const bonusPoints = firstMinSlot?.bonus_points ?? 0;
 
   const adviceSlot = todaySlot?.isMin
     ? todaySlot
@@ -72,6 +73,11 @@ export default function DailyCarouselItem({ item, onClick }: Props) {
           {item.is_new && (
             <span className="bg-amber-400 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
               NEW
+            </span>
+          )}
+          {bonusPoints > 0 && (
+            <span className="bg-violet-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+              +{bonusPoints}pt
             </span>
           )}
           {item.sale_end_date && (

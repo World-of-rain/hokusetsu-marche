@@ -17,6 +17,10 @@ export const OfferSchema = z.object({
   item_id: z.number().default(0),
   image_hash: z.string().default(""),
   anchor_id: z.string().default(""),
+  // 店舗ごとの実際の商品名（チラシ表記）。同日複数店舗の詳細表示で店舗別に出す
+  raw_item_name: z.string().default(""),
+  // ボーナスポイント（0なら付与なし）
+  bonus_points: z.number().default(0),
 });
 
 export const ScheduleItemSchema = z.object({
@@ -26,6 +30,8 @@ export const ScheduleItemSchema = z.object({
   isMin: z.boolean(),
   advice: z.string().default(""),
   is_new: z.boolean().default(false),
+  // その日の最安店のボーナスポイント（0なら付与なし）
+  bonus_points: z.number().default(0),
   purchase_condition: z.string().default(""),
   store_url: z.string().default(""),
   raw_item_name: z.string().default(""),
@@ -66,6 +72,8 @@ export const GeneralItemSchema = z.object({
   category: z.string().default(""),
   is_one_day_sale: z.boolean().default(false),
   is_new: z.boolean().default(false),
+  // ボーナスポイント（0なら付与なし）
+  bonus_points: z.number().default(0),
   sale_start_date: z.string().default(""),
   sale_end_date: z.string().default(""),
   purchase_condition: z.string().default(""),
@@ -137,6 +145,8 @@ export type SelectedItem = {
   jan_code?: string;
   product_url?: string;
   unit_price_text?: string;
+  // ボーナスポイント（0なら付与なし）。ストック等 SelectedItem を直接組む経路で使う
+  bonus_points?: number;
 };
 
 export type Offer = z.infer<typeof OfferSchema>;

@@ -213,6 +213,11 @@ export default function GeneralTable({
                                 本日限り
                               </span>
                             )}
+                            {item.bonus_points > 0 && (
+                              <span className="bg-violet-500 text-white text-[8px] leading-none px-1 py-0.5 rounded font-bold align-middle">
+                                +{item.bonus_points}pt
+                              </span>
+                            )}
                             {!item.is_one_day_sale && item.sale_end_date && (
                               <span className="text-stone-400 text-[9px] font-medium">
                                 {item.sale_end_date}

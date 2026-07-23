@@ -266,16 +266,44 @@ export default function BottomSheet({ item, onClose }: Props) {
                   .map((o, oi) => (
                     <div
                       key={oi}
-                      className="flex items-center justify-between text-xs py-1 border-b border-stone-50 last:border-0"
+                      className="flex items-start justify-between text-xs py-1.5 border-b border-stone-50 last:border-0 gap-2"
                     >
-                      <span className="text-stone-700 font-medium truncate mr-2">{o.shop}</span>
-                      <span
-                        className={`font-black whitespace-nowrap ${
-                          o.price === item.price ? "text-rose-600" : "text-stone-500"
-                        }`}
-                      >
-                        {o.price}円
-                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-stone-700 font-medium truncate">{o.shop}</div>
+                        {o.raw_item_name && (
+                          <div className="text-stone-400 text-[10px] leading-tight line-clamp-2 mt-0.5">
+                            {o.raw_item_name}
+                          </div>
+                        )}
+                        {o.store_url && (
+                          <a
+                            href={o.store_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex items-center gap-0.5 text-rose-500 text-[10px] font-bold mt-0.5 active:opacity-60"
+                          >
+                            <Glyph name="store" className="w-3 h-3" />
+                            チラシを見る ↗
+                          </a>
+                        )}
+                      </div>
+                      <div className="text-right whitespace-nowrap flex-shrink-0">
+                        <span
+                          className={`font-black ${
+                            o.price === item.price ? "text-rose-600" : "text-stone-500"
+                          }`}
+                        >
+                          {o.price}円
+                        </span>
+                        {o.bonus_points > 0 && (
+                          <div className="mt-0.5">
+                            <span className="bg-violet-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
+                              +{o.bonus_points}pt
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))}
               </div>
