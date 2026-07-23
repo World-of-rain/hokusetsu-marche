@@ -27,11 +27,7 @@ import HeroBanner from "../components/HeroBanner";
 import BrandMark from "../components/BrandMark";
 import SectionHeading from "../components/SectionHeading";
 import SectionPicker from "../components/SectionPicker";
-import {
-  cleanCategoryLabel,
-  stockOrderIndex,
-  STOCK_CATEGORY_ORDER,
-} from "../lib/stockCategories";
+import { cleanCategoryLabel, stockOrderIndex, STOCK_CATEGORY_ORDER } from "../lib/stockCategories";
 
 // 底値カレンダーの既定表示（ユーザーが未カスタマイズのときに出す定番5品）
 const DEFAULT_DAILY_PICKS = ["卵", "牛乳", "食パン", "納豆", "豆腐"];
@@ -79,7 +75,8 @@ export default function Dashboard({ data: initialData }: Props) {
 
   const filteredHighlights = useMemo(
     // 今週タブでは目玉品は今日・明日分をまとめて表示する
-    () => (currentTab === "week" ? data.highlights : data.highlights.filter((h) => h.day === currentTab)),
+    () =>
+      currentTab === "week" ? data.highlights : data.highlights.filter((h) => h.day === currentTab),
     [data.highlights, currentTab]
   );
 

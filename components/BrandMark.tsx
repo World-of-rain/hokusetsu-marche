@@ -17,7 +17,12 @@ export default function BrandMark({ className }: { className?: string }) {
         />
         {/* かご */}
         <path d="M5 11h14l-1.4 7.4a2 2 0 0 1-2 1.6H8.4a2 2 0 0 1-2-1.6z" fill="#fff" />
-        <path d="M9 13.5l.6 4M15 13.5l-.6 4M12 13.5v4" stroke="#fb7185" strokeWidth="1.1" strokeLinecap="round" />
+        <path
+          d="M9 13.5l.6 4M15 13.5l-.6 4M12 13.5v4"
+          stroke="#fb7185"
+          strokeWidth="1.1"
+          strokeLinecap="round"
+        />
       </svg>
     </span>
   );

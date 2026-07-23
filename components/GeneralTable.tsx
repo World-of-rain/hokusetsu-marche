@@ -202,7 +202,9 @@ export default function GeneralTable({
                         />
                         <div className="min-w-0">
                           <div className="flex items-baseline flex-wrap gap-x-1 gap-y-0.5">
-                            <span className="font-bold text-stone-700 leading-snug">{item.name}</span>
+                            <span className="font-bold text-stone-700 leading-snug">
+                              {item.name}
+                            </span>
                             {item.is_new && (
                               <span className="bg-amber-400 text-white text-[8px] leading-none px-1 py-0.5 rounded font-bold align-middle">
                                 NEW

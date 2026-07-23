@@ -222,7 +222,9 @@ export default function BottomSheet({ item, onClose }: Props) {
               <span className="text-stone-600 text-xs font-bold">特売価格</span>
               <div className="text-right">
                 <div className="flex items-baseline gap-1 justify-end">
-                  <span className="text-2xl font-black text-rose-600 leading-none">{item.price}</span>
+                  <span className="text-2xl font-black text-rose-600 leading-none">
+                    {item.price}
+                  </span>
                   <span className="text-rose-600 font-bold text-sm">円</span>
                 </div>
                 {item.unit_price_text && (

@@ -17,7 +17,13 @@ const GLYPHS: Record<Variant, ReactNode> = {
   stock: (
     <>
       <path d="M4 9l8-4 8 4-8 4z" fill="#fff" opacity="0.9" />
-      <path d="M4 9v7l8 4 8-4V9" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+      <path
+        d="M4 9v7l8 4 8-4V9"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
       <path d="M12 13v7" stroke="currentColor" strokeWidth="1.6" />
     </>
   ),
@@ -28,13 +34,21 @@ const GLYPHS: Record<Variant, ReactNode> = {
         fill="#fff"
         opacity="0.9"
       />
-      <path d="M12 20a3 3 0 0 0 3-3c0-2-1.5-3-3-4.5C10.5 14 9 15 9 17a3 3 0 0 0 3 3z" fill="currentColor" />
+      <path
+        d="M12 20a3 3 0 0 0 3-3c0-2-1.5-3-3-4.5C10.5 14 9 15 9 17a3 3 0 0 0 3 3z"
+        fill="currentColor"
+      />
     </>
   ),
   list: (
     <>
       <rect x="4" y="5" width="16" height="14" rx="3" fill="#fff" opacity="0.9" />
-      <path d="M8 9h8M8 12h8M8 15h5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <path
+        d="M8 9h8M8 12h8M8 15h5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
     </>
   ),
 };
