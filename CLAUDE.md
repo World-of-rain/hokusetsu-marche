@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 静的エクスポートを Cloudflare Pages で配信する。データはバックエンド `World-of-rain/smart_pantry`
 （NAS 上で稼働）が作る。コード・コメント・コミットメッセージは日本語。
 
+**ユーザーへの回答・報告はすべて日本語で行う。**
+
 ## コマンド
 
 ```bash
