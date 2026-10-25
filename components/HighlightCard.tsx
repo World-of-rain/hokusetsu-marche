@@ -1,61 +1,66 @@
 import ProductImage from "./ProductImage";
+import Yen from "./Yen";
+import { discountRate } from "../lib/summary";
 import type { GeneralItem, SelectedItem } from "../lib/types";
 
 type Props = {
   h: GeneralItem;
   onClick: (item: SelectedItem) => void;
+  index?: number;
 };
 
-// エリア最高目玉品のカード
-export default function HighlightCard({ h, onClick }: Props) {
+// 目玉品のカード。写真（またはイラスト）・品名・店・大きな値札。平均からの値引きを若葉色で示す
+export default function HighlightCard({ h, onClick, index = 0 }: Props) {
+  const off = discountRate(h);
   return (
-    <div
-      className="bg-white p-2.5 rounded-2xl shadow-sm border border-orange-100 relative overflow-hidden flex gap-2.5 cursor-pointer active:scale-[0.98] transition-transform"
+    <button
+      type="button"
+      data-reveal
+      data-reveal-delay={String(Math.min(index, 5) * 0.07)}
       onClick={() => onClick(h)}
+      className="group relative flex h-full w-full flex-col rounded-[22px] border border-ink/15 bg-paper-light p-5 text-left transition-all duration-500 ease-out hover:-translate-y-1 hover:border-ink hover:shadow-lift"
     >
-      <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-orange-400 to-rose-400"></div>
-
-      <ProductImage
-        name={h.name}
-        category={h.category}
-        icon={h.icon}
-        photoUrl={h.photo_url}
-        width={160}
-        className="w-12 h-12 rounded-xl flex-shrink-0 ml-1 shadow-sm"
-      />
-
-      <div className="flex-1">
-        <div className="flex justify-between items-start">
-          <div className="flex items-center flex-wrap gap-1">
-            <span className="font-black text-xs text-stone-800 leading-tight">{h.name}</span>
-            {h.is_new && (
-              <span className="bg-amber-400 text-white text-[10px] px-1 py-0.5 rounded-full font-bold">
-                NEW
-              </span>
-            )}
-            {h.bonus_points > 0 && (
-              <span className="bg-violet-500 text-white text-[10px] px-1 py-0.5 rounded-full font-bold">
-                +{h.bonus_points}pt
-              </span>
-            )}
-            {!h.is_one_day_sale && h.sale_end_date && (
-              <span className="text-stone-500 text-[10px] font-medium ml-1">{h.sale_end_date}</span>
-            )}
-          </div>
-          <span className="flex-shrink-0 ml-1 text-[10px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded-full font-bold">
-            {h.day === "today" ? "今日限定" : "明日限定"}
+      <div className="flex items-start justify-between gap-3">
+        <ProductImage
+          name={h.name}
+          category={h.category}
+          icon={h.icon}
+          photoUrl={h.photo_url}
+          width={200}
+          className="h-16 w-16 shrink-0 rounded-2xl border rule transition-transform duration-500 ease-out group-hover:scale-105"
+        />
+        <div className="flex flex-wrap justify-end gap-1">
+          <span className="rounded-full bg-ink px-2.5 py-1 text-[10px] font-bold tracking-wider text-paper">
+            {h.day === "today" ? "今日限定" : h.day === "tomorrow" ? "明日限定" : "今週"}
           </span>
-        </div>
-        <div className="text-[10px] text-stone-600 mt-1 leading-relaxed">
-          {h.comment || "過去の平均価格より大幅にお得！見逃し厳禁の特売品です。"}
-        </div>
-        <div className="text-right mt-1.5 pt-1.5 border-t border-dashed border-stone-200">
-          <span className="text-stone-500 text-[10px]">({h.shop})</span>
-          <span className="text-base font-black text-rose-600 ml-1 tracking-tight">
-            {h.price}円
-          </span>
+          {h.is_new && (
+            <span className="rounded-full bg-mustard px-2 py-1 text-[10px] font-bold text-ink">
+              NEW
+            </span>
+          )}
+          {h.bonus_points > 0 && (
+            <span className="rounded-full bg-plum px-2 py-1 text-[10px] font-bold text-white">
+              +{h.bonus_points}pt
+            </span>
+          )}
         </div>
       </div>
-    </div>
+      <h3 className="mt-4 phrase font-display text-[1.35rem] leading-snug text-ink">{h.name}</h3>
+      <p className="mt-2 line-clamp-2 text-[13px] leading-relaxed text-ink-soft">
+        {h.comment || "過去の平均価格より大幅にお得。見逃し厳禁の特売品です。"}
+      </p>
+      <div className="mt-auto flex items-end justify-between gap-3 border-t border-dashed border-ink/25 pt-4">
+        <div className="min-w-0">
+          <p className="truncate text-[12px] font-bold text-ink-soft">{h.shop}</p>
+          {!h.is_one_day_sale && h.sale_end_date && (
+            <p className="text-[11px] text-ink-mute">{h.sale_end_date}</p>
+          )}
+        </div>
+        <div className="text-right">
+          {off > 0 && <p className="num text-sm leading-none text-leaf">−{off}%</p>}
+          <Yen value={h.price} className="text-[2.6rem] leading-none text-persimmon" />
+        </div>
+      </div>
+    </button>
   );
 }

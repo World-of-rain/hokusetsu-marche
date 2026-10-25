@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import SectionHeading from "./SectionHeading";
 import FoodIcon from "./FoodIcon";
 import ProductImage from "./ProductImage";
 import { cleanCategoryLabel, stockCategoryIcon } from "../lib/stockCategories";
@@ -16,7 +15,7 @@ type Props = {
   emptyMessage?: string;
 };
 
-// ストック・まとめ買い品のカテゴリ別アコーディオン
+// ストック・まとめ買い品のカテゴリ別の引き出し。紙面の索引のように番号と罫線で並べる
 export default function StockAccordion({
   stocks,
   openIdx,
@@ -26,116 +25,119 @@ export default function StockAccordion({
   emptyMessage,
 }: Props) {
   return (
-    <section>
-      <SectionHeading
-        variant="stock"
-        title="ストック・まとめ買いのチャンス"
-        tint="text-amber-700"
-        chipBg="from-amber-400 to-yellow-400"
-      />
+    <div>
       {picker}
       {stocks.length === 0 && emptyMessage && (
-        <p className="text-[11px] text-stone-400 text-center py-3 bg-white rounded-xl border border-stone-100">
+        <p className="rounded-2xl border border-dashed border-ink/25 py-6 text-center text-[13px] text-ink-mute">
           {emptyMessage}
         </p>
       )}
-      <div className="space-y-1.5">
+      <ul className="border-t rule-strong">
         {stocks.map((s, i) => {
           const hasItem = s.items.length > 0;
           const isOpen = openIdx === i;
-          // バックエンドのラベルに残る先頭絵文字を除去し、カテゴリ専用アイコンを当てる
           const catLabel = cleanCategoryLabel(s.cat);
           return (
-            <div
+            <li
               key={i}
-              className="bg-white rounded-xl shadow-sm border border-stone-100 overflow-hidden"
+              className="border-b rule"
+              data-reveal
+              data-reveal-delay={String(Math.min(i, 6) * 0.05)}
             >
               <button
+                type="button"
                 onClick={() => hasItem && onToggle(i)}
-                className={`w-full p-2.5 flex justify-between items-center text-xs transition-colors ${
-                  hasItem
-                    ? "cursor-pointer hover:bg-stone-50 active:bg-stone-100"
-                    : "opacity-50 cursor-not-allowed"
+                aria-expanded={isOpen}
+                className={`group flex w-full items-center gap-3 py-4 text-left transition-colors md:gap-4 ${
+                  hasItem ? "hover:text-persimmon" : "cursor-not-allowed opacity-50"
                 }`}
               >
-                <span className="flex items-center gap-2 font-bold text-stone-700">
-                  <FoodIcon
-                    name={catLabel}
-                    icon={stockCategoryIcon(catLabel)}
-                    className="w-7 h-7 rounded-lg flex-shrink-0"
-                    padClassName="p-[14%]"
-                  />
+                <span className="num hidden w-8 text-sm text-ink-mute sm:inline">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <FoodIcon
+                  name={catLabel}
+                  icon={stockCategoryIcon(catLabel)}
+                  className="h-11 w-11 shrink-0 rounded-xl"
+                  padClassName="p-[16%]"
+                />
+                <span className="phrase min-w-0 font-display text-lg leading-tight text-ink group-hover:text-persimmon sm:text-xl md:text-2xl">
                   {catLabel}
                 </span>
-                <span
-                  className={`text-[10px] px-2.5 py-1 rounded-full font-bold ${
-                    hasItem ? "bg-amber-100 text-amber-700" : "bg-stone-100 text-stone-400"
-                  }`}
-                >
-                  {hasItem ? `${s.items.length}件あり` : "特売なし"}
+                <span className="ml-auto flex shrink-0 items-center gap-2 md:gap-3">
+                  <span
+                    className={`whitespace-nowrap rounded-full px-3 py-1 text-[12px] font-bold ${
+                      hasItem ? "bg-mustard-tint text-ink" : "bg-paper-deep text-ink-mute"
+                    }`}
+                  >
+                    {hasItem ? `${s.items.length}件あり` : "特売なし"}
+                  </span>
+                  {hasItem && (
+                    <span
+                      aria-hidden="true"
+                      className={`grid h-8 w-8 place-items-center rounded-full border border-ink/25 text-lg transition-transform duration-500 ease-out ${
+                        isOpen ? "rotate-45 border-ink bg-ink text-paper" : ""
+                      }`}
+                    >
+                      +
+                    </span>
+                  )}
                 </span>
               </button>
-
               <div
-                style={{
-                  maxHeight: isOpen ? "70vh" : "0px",
-                  overflowY: "auto",
-                  transition: "max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                }}
+                className="grid transition-[grid-template-rows] duration-500 ease-out"
+                style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
               >
-                <div className="px-3 pb-2 pt-1 text-[11px] border-t border-stone-50 bg-[#faf9f8]">
-                  {s.items.map((item, j) => (
-                    <div
-                      key={j}
-                      className="flex justify-between items-start gap-2 py-1.5 border-b border-stone-100 last:border-0 cursor-pointer active:bg-stone-100"
-                      onClick={() => onClick(item)}
-                    >
-                      {/* 商品名側を広くとる（店名は右カラムで価格の下に折り返す） */}
-                      <div className="flex items-start gap-1.5 min-w-0 flex-1">
-                        <ProductImage
-                          name={item.name}
-                          icon={item.icon}
-                          photoUrl={item.photo_url}
-                          width={100}
-                          className="w-6 h-6 rounded-md flex-shrink-0 mt-0.5"
-                        />
-                        <div className="min-w-0">
-                          <span className="font-medium text-stone-600 leading-snug break-words">
-                            {item.name}
-                            {item.is_new && (
-                              <span className="bg-amber-400 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold ml-1 align-middle whitespace-nowrap">
-                                NEW
-                              </span>
-                            )}
-                            {(item.bonus_points ?? 0) > 0 && (
-                              <span className="bg-violet-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold ml-1 align-middle whitespace-nowrap">
-                                +{item.bonus_points}pt
-                              </span>
-                            )}
+                <div className="overflow-hidden">
+                  <ul className="grid gap-x-8 pb-5 md:grid-cols-2 md:pl-12">
+                    {s.items.map((item, j) => (
+                      <li key={j}>
+                        <button
+                          type="button"
+                          tabIndex={isOpen ? 0 : -1}
+                          onClick={() => onClick(item)}
+                          className="flex w-full items-center gap-3 border-b border-dashed border-ink/15 py-3 text-left hover:bg-paper-light"
+                        >
+                          <ProductImage
+                            name={item.name}
+                            icon={item.icon}
+                            photoUrl={item.photo_url}
+                            width={100}
+                            className="h-10 w-10 shrink-0 rounded-xl border rule"
+                          />
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-[14px] font-bold leading-snug text-ink">
+                              {item.name}
+                              {item.is_new && (
+                                <span className="ml-1.5 rounded-full bg-mustard px-1.5 py-0.5 align-middle text-[9px] font-bold">
+                                  NEW
+                                </span>
+                              )}
+                              {(item.bonus_points ?? 0) > 0 && (
+                                <span className="ml-1.5 rounded-full bg-plum px-1.5 py-0.5 align-middle text-[9px] font-bold text-white">
+                                  +{item.bonus_points}pt
+                                </span>
+                              )}
+                            </span>
+                            <span className="block text-[11px] text-ink-mute">
+                              {item.shop}
+                              {item.sale_end_date ? ` ・ ${item.sale_end_date}` : ""}
+                            </span>
                           </span>
-                          {item.sale_end_date && (
-                            <div className="text-stone-400 text-[10px] font-medium leading-tight">
-                              {item.sale_end_date}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex-shrink-0 w-[84px] text-right">
-                        <strong className="text-rose-600 font-black text-[13px]">
-                          {item.price}円
-                        </strong>
-                        <div className="text-stone-500 text-[9px] leading-tight break-words">
-                          {item.shop}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                          <span className="num shrink-0 text-2xl text-persimmon">
+                            {item.price}
+                            <span className="font-sans text-[11px] font-bold">円</span>
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
-            </div>
+            </li>
           );
         })}
-      </div>
-    </section>
+      </ul>
+    </div>
   );
 }

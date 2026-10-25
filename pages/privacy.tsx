@@ -7,6 +7,7 @@ export default function Privacy() {
       title="プライバシーポリシー"
       description="北摂マルシェのプライバシーポリシー。Cookieの利用、Google AdSenseによる広告配信、アクセス解析、個人情報の取り扱いについて記載しています。"
       path="/privacy"
+      kicker="Privacy"
     >
       <p>
         当サイト「北摂マルシェ」（以下「当サイト」）における個人情報・Cookie等の取り扱いについて、

@@ -16,43 +16,46 @@ export default function SectionPicker({ label, options, selected, onChange }: Pr
     onChange(selected.includes(name) ? selected.filter((s) => s !== name) : [...selected, name]);
 
   return (
-    <div className="-mt-2 mb-3">
+    <div className="mb-4">
       <div className="flex justify-end">
         <button
+          type="button"
           onClick={() => setOpen(!open)}
           aria-expanded={open}
-          className={`flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full border transition-colors ${
+          className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[12px] font-bold transition-colors ${
             open
-              ? "bg-stone-600 text-white border-stone-600"
-              : "bg-white text-stone-400 border-stone-200 hover:text-stone-600"
+              ? "border-ink bg-ink text-paper"
+              : "border-ink/25 text-ink-soft hover:border-ink hover:text-ink"
           }`}
         >
-          <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none" aria-hidden="true">
-            <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" />
+          <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" aria-hidden="true">
             <path
-              d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"
+              d="M4 7h10M18 7h2M4 17h4M12 17h8"
               stroke="currentColor"
               strokeWidth="2"
               strokeLinecap="round"
             />
+            <circle cx="16" cy="7" r="2" stroke="currentColor" strokeWidth="2" />
+            <circle cx="10" cy="17" r="2" stroke="currentColor" strokeWidth="2" />
           </svg>
           {label}
         </button>
       </div>
       {open && (
-        <div className="mt-2 p-2.5 bg-stone-50 rounded-xl border border-stone-100">
-          <div className="flex flex-wrap gap-1.5">
+        <div className="fade-in mt-3 rounded-2xl border rule bg-paper-light p-4">
+          <div className="flex flex-wrap gap-2">
             {options.map((name) => {
               const on = selected.includes(name);
               return (
                 <button
+                  type="button"
                   key={name}
                   onClick={() => toggle(name)}
                   aria-pressed={on}
-                  className={`text-[11px] font-bold px-2.5 py-1 rounded-full border transition-colors ${
+                  className={`rounded-full border px-3 py-1.5 text-[12px] font-bold transition-colors ${
                     on
-                      ? "bg-teal-500 text-white border-teal-500"
-                      : "bg-white text-stone-400 border-stone-200"
+                      ? "border-leaf bg-leaf text-white"
+                      : "border-ink/20 text-ink-soft hover:border-ink"
                   }`}
                 >
                   {on ? "✓ " : ""}
@@ -61,7 +64,7 @@ export default function SectionPicker({ label, options, selected, onChange }: Pr
               );
             })}
           </div>
-          <p className="text-[9px] text-stone-400 mt-1.5">
+          <p className="mt-3 text-[11px] text-ink-mute">
             選んだ内容はこの端末に保存され、次回も同じ表示になります。
           </p>
         </div>

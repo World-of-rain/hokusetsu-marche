@@ -1,6 +1,15 @@
 import { DashboardResponseSchema, type DashboardData } from "./types";
 
-export async function fetchSaleData(): Promise<DashboardData | null> {
+// ビルド中は同じデータを何度も取りにいかない（トップと店舗別ページで共有する）。
+// バックエンドの応答は1分を超えることがあるので、ページごとに取ると書き出しが長くなる
+let cached: Promise<DashboardData | null> | null = null;
+
+export function fetchSaleData(): Promise<DashboardData | null> {
+  if (!cached) cached = fetchSaleDataOnce();
+  return cached;
+}
+
+async function fetchSaleDataOnce(): Promise<DashboardData | null> {
   const apiUrl = process.env.API_URL || "http://localhost:8000/api/prices/shonai";
 
   try {

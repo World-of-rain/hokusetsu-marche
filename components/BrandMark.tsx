@@ -1,29 +1,15 @@
-// ヘッダーのロゴマーク（絵文字🛒の置き換え）。買い物かご＋新芽のイラスト。
+// ロゴマーク。柿の実（柿色の円）に若葉とヘタ。値札の穴を思わせる白い点を添える
 export default function BrandMark({ className }: { className?: string }) {
   return (
-    <span
-      className={`inline-flex items-center justify-center rounded-xl shadow-sm ${className ?? "w-7 h-7"}`}
-      style={{ background: "linear-gradient(135deg,#fb7185,#f59e0b)" }}
-      aria-hidden="true"
-    >
-      <svg viewBox="0 0 24 24" className="w-[70%] h-[70%]">
-        {/* 新芽 */}
-        <path
-          d="M12 8c0-2-1.6-3.4-3.4-3.4C9 6.4 10.4 8 12 8zm0 0c0-2 1.6-3.4 3.4-3.4C15 6.4 13.6 8 12 8zm0 0v3"
-          fill="#fff"
-          stroke="#fff"
-          strokeWidth="0.6"
-          strokeLinecap="round"
-        />
-        {/* かご */}
-        <path d="M5 11h14l-1.4 7.4a2 2 0 0 1-2 1.6H8.4a2 2 0 0 1-2-1.6z" fill="#fff" />
-        <path
-          d="M9 13.5l.6 4M15 13.5l-.6 4M12 13.5v4"
-          stroke="#fb7185"
-          strokeWidth="1.1"
-          strokeLinecap="round"
-        />
-      </svg>
-    </span>
+    <svg viewBox="0 0 40 40" className={className ?? "w-8 h-8"} aria-hidden="true">
+      <circle cx="20" cy="22" r="15" fill="#e2482a" />
+      <path
+        d="M13 12.5c2.6-3.4 5.4-4.3 7-4.3s4.4.9 7 4.3c-2.6.6-4.6 1-7 1s-4.4-.4-7-1z"
+        fill="#2f6b4f"
+      />
+      <path d="M20 8.2V4.5" stroke="#1c1a16" strokeWidth="2.2" strokeLinecap="round" />
+      <path d="M21 5.2c2.8-1.8 6-1.5 7.5.3-2.2 1.6-5 1.8-7.5-.3z" fill="#2f6b4f" />
+      <circle cx="27.5" cy="27" r="2.4" fill="#f3eee4" />
+    </svg>
   );
 }

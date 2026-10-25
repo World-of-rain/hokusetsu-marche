@@ -1,8 +1,8 @@
 import { ReactNode } from "react";
 import Head from "next/head";
 import Link from "next/link";
+import SiteHeader from "./SiteHeader";
 import SiteFooter from "./SiteFooter";
-import BrandMark from "./BrandMark";
 import { SITE_URL, SITE_NAME } from "../lib/site";
 
 type Props = {
@@ -12,10 +12,20 @@ type Props = {
   children: ReactNode;
   // ページ固有の追加構造化データ（例: 使い方ガイドのFAQPage）
   structuredData?: object[];
+  /** 見出しの上の欧文キッカー */
+  kicker?: string;
 };
 
 // プライバシーポリシー・運営者情報・使い方ガイドなどの読み物ページ用の共通シェル。
-export default function DocPage({ title, description, path, children, structuredData }: Props) {
+// 紙面の囲み記事のように、細い段組みに明朝の大見出しで組む
+export default function DocPage({
+  title,
+  description,
+  path,
+  children,
+  structuredData,
+  kicker,
+}: Props) {
   const fullTitle = `${title} | ${SITE_NAME}`;
   // パンくず（トップ → 当ページ）。検索結果のパス表示を安定させる
   const jsonLd: object[] = [
@@ -30,13 +40,11 @@ export default function DocPage({ title, description, path, children, structured
     ...(structuredData || []),
   ];
   return (
-    <div className="bg-[#f5f4f1] font-sans antialiased text-stone-800 min-h-screen">
+    <>
       <Head>
         <title>{fullTitle}</title>
         <meta name="description" content={description} />
         <link rel="canonical" href={`${SITE_URL}${path}`} />
-        <meta name="theme-color" content="#e11d48" />
-        <link rel="icon" href="/icons/icon-192.png" type="image/png" />
         <meta property="og:type" content="article" />
         <meta property="og:site_name" content={SITE_NAME} />
         <meta property="og:title" content={fullTitle} />
@@ -54,56 +62,94 @@ export default function DocPage({ title, description, path, children, structured
         />
       </Head>
 
-      <div className="max-w-md mx-auto bg-[#faf9f8] min-h-screen shadow-xl">
-        <header className="bg-white/80 backdrop-blur-xl border-b border-stone-200 sticky top-0 z-40 p-4">
-          <Link href="/" className="text-sm font-black text-stone-800 flex items-center gap-1.5">
-            <BrandMark className="w-6 h-6" /> {SITE_NAME}
-          </Link>
-        </header>
+      <SiteHeader />
 
-        <main className="p-5">
-          <h1 className="text-xl font-black text-stone-800 mb-1">{title}</h1>
-          <div className="w-10 h-1 bg-rose-400 rounded-full mb-5"></div>
-          <div className="doc-body text-sm text-stone-700 leading-relaxed space-y-4">
+      <main id="main" className="mx-auto max-w-page px-4 sm:px-6 lg:px-10">
+        <nav aria-label="パンくずリスト" className="pt-8 text-[12px] text-ink-mute">
+          <ol className="flex items-center gap-2">
+            <li>
+              <Link href="/" className="link-draw hover:text-ink">
+                {SITE_NAME}
+              </Link>
+            </li>
+            <li aria-hidden="true">/</li>
+            <li aria-current="page" className="text-ink-soft">
+              {title}
+            </li>
+          </ol>
+        </nav>
+        <div className="grid gap-10 pb-10 pt-10 lg:grid-cols-12">
+          <header className="lg:col-span-4">
+            <div className="lg:sticky lg:top-28">
+              <p className="border-t-2 rule-strong pt-3 text-[11px] uppercase tracking-[0.2em] text-ink-soft">
+                {kicker ?? "Notes"}
+              </p>
+              <h1 className="rise mt-5 font-display text-[2.6rem] leading-[1.1] text-ink md:text-[3.4rem]">
+                {title}
+              </h1>
+              <p className="mt-5 text-[14px] leading-[1.9] text-ink-mute">{description}</p>
+            </div>
+          </header>
+          <div className="doc-body max-w-2xl text-[15px] leading-[2] text-ink-soft lg:col-span-7 lg:col-start-6">
             {children}
+            <div className="mt-14">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-sm font-bold text-paper transition-colors hover:bg-persimmon"
+              >
+                ← トップに戻る
+              </Link>
+            </div>
           </div>
-          <div className="mt-8">
-            <Link
-              href="/"
-              className="inline-block bg-stone-800 text-white text-sm font-bold px-5 py-2.5 rounded-2xl active:bg-stone-700"
-            >
-              ← トップに戻る
-            </Link>
-          </div>
-        </main>
+        </div>
+      </main>
 
-        <SiteFooter />
-      </div>
+      <SiteFooter />
 
       <style jsx global>{`
-        .doc-body h2 {
-          font-size: 1rem;
-          font-weight: 800;
-          color: #292524;
-          margin-top: 1.5rem;
-          margin-bottom: 0.25rem;
+        .doc-body > * + * {
+          margin-top: 1.1rem;
         }
-        .doc-body p {
-          margin-bottom: 0.5rem;
+        .doc-body h2 {
+          font-family: var(--font-display), serif;
+          font-size: 1.6rem;
+          line-height: 1.35;
+          color: #1c1a16;
+          margin-top: 3rem;
+          padding-top: 1rem;
+          border-top: 1px solid rgba(28, 26, 22, 0.14);
+        }
+        .doc-body h3 {
+          font-weight: 700;
+          color: #1c1a16;
+          margin-top: 1.6rem;
         }
         .doc-body ul {
-          list-style: disc;
-          padding-left: 1.25rem;
-          margin-bottom: 0.5rem;
+          list-style: none;
+          padding-left: 0;
         }
         .doc-body li {
-          margin-bottom: 0.25rem;
+          position: relative;
+          padding-left: 1.2rem;
+          margin-top: 0.4rem;
+        }
+        .doc-body li::before {
+          content: "";
+          position: absolute;
+          left: 0;
+          top: 0.85em;
+          width: 0.45rem;
+          height: 0.45rem;
+          border-radius: 9999px;
+          background: #e2482a;
         }
         .doc-body a {
-          color: #1d4ed8;
+          color: #1c1a16;
           text-decoration: underline;
+          text-decoration-color: #e2482a;
+          text-underline-offset: 3px;
         }
       `}</style>
-    </div>
+    </>
   );
 }

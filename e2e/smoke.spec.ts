@@ -5,7 +5,7 @@ import { test, expect } from "@playwright/test";
 
 test("トップページが表示され、主要セクションが描画される", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /北摂マルシェ/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /北摂マルシェ/, level: 1 })).toBeVisible();
   // 底値カレンダー（モックの卵）
   await expect(page.getByText("卵", { exact: true }).first()).toBeVisible();
   // 目玉品
@@ -154,7 +154,7 @@ test("底値カレンダーの品目とストック枠のカテゴリをユー�
 
   // 品目ピッカーで牛乳を外す → カレンダーから消える
   await cal.getByRole("button", { name: "表示する品目を選ぶ" }).click();
-  await cal.getByRole("button", { name: /牛乳/ }).click();
+  await cal.getByRole("button", { name: "✓ 牛乳" }).click();
   await cal.getByRole("button", { name: "表示する品目を選ぶ" }).click(); // パネルを閉じる
   await expect(cal.getByText("牛乳", { exact: true })).toBeHidden();
   await expect(cal.getByText("卵", { exact: true })).toBeVisible();
@@ -196,5 +196,37 @@ test("日付セルのタップでその日の詳細が開く", async ({ page }) 
   await page.getByText("198円").first().click();
   await expect(page.getByRole("button", { name: "閉じる" })).toBeVisible();
   // 日付バッジが表示される
-  await expect(page.locator("h3", { hasText: "卵" })).toBeVisible();
+  await expect(page.getByRole("dialog").locator("h3", { hasText: "卵" })).toBeVisible();
+});
+
+test("SEO/SAO: トップに本日のまとめ・よくある質問・FAQPage が出る", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(
+    "豊中市 庄内・服部のスーパー特売"
+  );
+  await expect(page.getByRole("heading", { name: "よくある質問", level: 2 })).toBeVisible();
+  await expect(page.getByText("北摂マルシェとは何ですか？")).toBeVisible();
+  const ld = await page.locator('script[type="application/ld+json"]').first().textContent();
+  expect(ld).toContain('"FAQPage"');
+  expect(ld).toContain('"Organization"');
+});
+
+test("店舗別ページが開け、その店の特売とパンくずが出る", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("link", { name: "ライフ", exact: true }).click();
+  await expect(page).toHaveURL(/\/stores\/life-shonai/);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("ライフ");
+  await expect(page.getByRole("navigation", { name: "パンくずリスト" })).toBeVisible();
+  await expect(page.getByText("豚こま切れ（300g）").first()).toBeVisible();
+  const ld = await page.locator('script[type="application/ld+json"]').first().textContent();
+  expect(ld).toContain('"BreadcrumbList"');
+  expect(ld).toContain('"GroceryStore"');
+});
+
+test("AI 向けの案内（llms.txt）とサイトマップに店舗ページがある", async ({ request }) => {
+  const llms = await request.get("/llms.txt");
+  expect(llms.ok()).toBeTruthy();
+  expect(await llms.text()).toContain("# 北摂マルシェ");
+  const sitemap = await request.get("/sitemap.xml");
+  expect(await sitemap.text()).toContain("/stores/life-shonai");
 });

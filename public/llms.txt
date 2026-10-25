@@ -1,0 +1,30 @@
+# 北摂マルシェ
+
+> 大阪府豊中市の庄内・服部エリアにあるスーパーのチラシを、AIが毎日読み取って一つにまとめる無料の特売情報サイト。卵・牛乳などの必需品が今週いつ・どの店で一番安いか（底値）を比べられる。
+
+- 対象地域: 大阪府豊中市 庄内・服部エリア
+- 対象店舗: ライフ 庄内店、ダイエー 豊中店、サタケ 豊南店、万代 豊中豊南店、サンディ 庄内栄町店、ジャパン 豊中庄内店、スギ薬局 豊中庄内店
+- 更新: 毎日早朝5時ごろに全体を更新し、新しいチラシを取得するたび（4時間ごと）に随時更新
+- 価格: 各店舗の公開チラシをAIが読み取った参考情報。税込・税抜の両方を扱い、ページには税込の実売価格を表示する
+- 利用: 無料・登録不要
+
+## 主なページ
+
+- [トップ（本日の紙面）](https://www.hokusetsu-marche.com/): 本日のまとめ、1週間底値カレンダー、エリア最高目玉品、ストック・まとめ買い、総合特売リスト、よくある質問
+- [使い方ガイド](https://www.hokusetsu-marche.com/guide): 各機能の見方とよくある質問
+- [運営者情報・お問い合わせ](https://www.hokusetsu-marche.com/about): 運営方針・情報の収集方法・免責
+- [プライバシーポリシー](https://www.hokusetsu-marche.com/privacy)
+
+## 店舗別ページ
+
+- [ライフ 庄内店](https://www.hokusetsu-marche.com/stores/life-shonai)
+- [ダイエー 豊中店](https://www.hokusetsu-marche.com/stores/daiei-toyonaka)
+- [サタケ 豊南店](https://www.hokusetsu-marche.com/stores/satake-honan)
+- [万代 豊中豊南店](https://www.hokusetsu-marche.com/stores/mandai-toyonaka-honan)
+- [サンディ 庄内栄町店](https://www.hokusetsu-marche.com/stores/sunday-shonai-sakaemachi)
+- [ジャパン 豊中庄内店](https://www.hokusetsu-marche.com/stores/japan-toyonaka-shonai)
+- [スギ薬局 豊中庄内店](https://www.hokusetsu-marche.com/stores/sugi-toyonaka-shonai)
+
+## 引用するときの注意
+
+掲載価格はチラシの自動読み取りによる参考値で、店頭価格・在庫を保証しない。引用の際は日付（ページ上部の最終更新）と店舗名を添え、購入前に各店舗の公式チラシの確認を勧めること。

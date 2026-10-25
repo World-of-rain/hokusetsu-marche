@@ -1,6 +1,8 @@
 import "../styles/globals.css";
 import { useEffect } from "react";
 import type { AppProps } from "next/app";
+import { fontVariables } from "../lib/fonts";
+import { useReveal } from "../lib/useReveal";
 
 export default function App({ Component, pageProps }: AppProps) {
   // PWA: Service Workerを登録（本番のみ）。オフライン時は最後に取得したデータを表示する
@@ -11,6 +13,11 @@ export default function App({ Component, pageProps }: AppProps) {
       });
     }
   }, []);
+  useReveal();
 
-  return <Component {...pageProps} />;
+  return (
+    <div className={`${fontVariables} font-sans grain min-h-screen`}>
+      <Component {...pageProps} />
+    </div>
+  );
 }

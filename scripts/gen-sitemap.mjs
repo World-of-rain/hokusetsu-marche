@@ -12,8 +12,25 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.hokusetsu-marc
 // JSTの今日の日付（YYYY-MM-DD）
 const today = new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Tokyo" }).format(new Date());
 
+// 店舗別ページ（lib/storeLinks.ts の slug と対）
+const STORE_SLUGS = [
+  "life-shonai",
+  "daiei-toyonaka",
+  "satake-honan",
+  "mandai-toyonaka-honan",
+  "sunday-shonai-sakaemachi",
+  "japan-toyonaka-shonai",
+  "sugi-toyonaka-shonai",
+];
+
 const pages = [
   { path: "/", changefreq: "daily", priority: "1.0", lastmod: today },
+  ...STORE_SLUGS.map((s) => ({
+    path: `/stores/${s}`,
+    changefreq: "daily",
+    priority: "0.8",
+    lastmod: today,
+  })),
   { path: "/guide", changefreq: "monthly", priority: "0.7" },
   { path: "/privacy", changefreq: "yearly", priority: "0.3" },
   { path: "/about", changefreq: "yearly", priority: "0.3" },

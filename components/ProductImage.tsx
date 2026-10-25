@@ -17,6 +17,7 @@ type Props = {
 // 商品ビジュアル。優先順位は
 //   ① 実商品写真(photoUrl・Yahoo照合) → ② カテゴリのフリー写真 → ③ 自前SVGイラスト
 // と多段フォールバックし、壊れた画像は決して出さない。
+// 写真が届くまでは下に③のイラストを敷き、届いたら写真をふわっと重ねる（白い箱を見せない）
 export default function ProductImage({
   name,
   category,
@@ -27,6 +28,7 @@ export default function ProductImage({
 }: Props) {
   const key = normalizeIconKey(icon) ?? pickIconKey(name, category);
   const [failedUrls, setFailedUrls] = useState<string[]>([]);
+  const [loaded, setLoaded] = useState<string | null>(null);
 
   const candidates = [photoUrl, photoForKey(key, width)].filter(
     (u): u is string => !!u && !failedUrls.includes(u)
@@ -38,7 +40,13 @@ export default function ProductImage({
   }
 
   return (
-    <div className={`relative overflow-hidden bg-white ${className ?? ""}`} aria-hidden="true">
+    <div className={`relative overflow-hidden ${className ?? ""}`} aria-hidden="true">
+      <FoodIcon
+        name={name}
+        category={category}
+        icon={icon}
+        className="absolute inset-0 h-full w-full"
+      />
       {/* 静的エクスポート(output:export)では next/image 最適化は使えないため素の img を使う */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
@@ -46,8 +54,11 @@ export default function ProductImage({
         alt=""
         loading="lazy"
         decoding="async"
+        onLoad={() => setLoaded(src)}
         onError={() => setFailedUrls((prev) => [...prev, src])}
-        className={`absolute inset-0 w-full h-full ${src === photoUrl ? "object-contain" : "object-cover"}`}
+        className={`absolute inset-0 h-full w-full bg-white transition-opacity duration-500 ${
+          src === photoUrl ? "object-contain" : "object-cover"
+        } ${loaded === src ? "opacity-100" : "opacity-0"}`}
       />
     </div>
   );

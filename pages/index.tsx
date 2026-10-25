@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Head from "next/head";
 import type { GetStaticProps } from "next";
 
@@ -14,19 +14,28 @@ import {
   DEFAULT_AREA,
   ADSENSE_SLOT_TOP,
   ADSENSE_SLOT_BOTTOM,
+  CONTACT_EMAIL,
 } from "../lib/site";
+import { FAQ_JSONLD } from "../lib/faq";
+import { buildSummary, discountRate } from "../lib/summary";
+import { isoDate, jstToday, longJa, weekEn } from "../lib/dates";
 import type { DashboardData, SelectedItem, StockGroup } from "../lib/types";
 import AdUnit from "../components/AdUnit";
+import SiteHeader from "../components/SiteHeader";
 import SiteFooter from "../components/SiteFooter";
 import BottomSheet from "../components/BottomSheet";
 import DailyCarouselItem from "../components/DailyCarouselItem";
 import StockAccordion from "../components/StockAccordion";
 import HighlightCard from "../components/HighlightCard";
 import GeneralTable, { type SortKey } from "../components/GeneralTable";
-import HeroBanner from "../components/HeroBanner";
-import BrandMark from "../components/BrandMark";
-import SectionHeading from "../components/SectionHeading";
+import Hero from "../components/Hero";
+import Ticker from "../components/Ticker";
+import SectionHead from "../components/SectionHead";
 import SectionPicker from "../components/SectionPicker";
+import DayTabs, { type Day } from "../components/DayTabs";
+import StoreDirectory from "../components/StoreDirectory";
+import HowItWorks from "../components/HowItWorks";
+import FaqList from "../components/FaqList";
 import { cleanCategoryLabel, stockOrderIndex, STOCK_CATEGORY_ORDER } from "../lib/stockCategories";
 
 // 底値カレンダーの既定表示（ユーザーが未カスタマイズのときに出す定番5品）
@@ -42,16 +51,27 @@ const SAMPLE_DATA: DashboardData = {
 
 type Props = {
   data: DashboardData;
+  /** ビルドした日（日本時間・YYYY-MM-DD）。表示後は端末の今日に置き換える */
+  builtOn: string;
 };
 
-export default function Dashboard({ data: initialData }: Props) {
+const SECTION = "mx-auto max-w-page px-4 pt-20 sm:px-6 md:pt-28 lg:px-10";
+
+export default function Dashboard({ data: initialData, builtOn }: Props) {
   // ビルド時データを初期表示し、表示後にKV（Pages Function）の最新データへ差し替える
   const data = useLiveDashboardData(initialData, DEFAULT_AREA);
 
-  const [currentTab, setCurrentTab] = useState<"today" | "tomorrow" | "week">("today");
+  // 静的書き出しと表示時で日付がずれないよう、最初はビルドした日で描き、表示後に今日へ置き換える
+  const [today, setToday] = useState(() => {
+    const [y, m, d] = builtOn.split("-").map(Number);
+    return new Date(y, m - 1, d);
+  });
+  useEffect(() => setToday(jstToday()), []);
+
+  const [currentTab, setCurrentTab] = useState<Day>("today");
   const [searchQuery, setSearchQuery] = useState("");
   const [openAccordion, setOpenAccordion] = useState<number | null>(null);
-  const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null); // ボトムシート用
+  const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null); // 詳細シート用
 
   // フィルタ・並び順・お気に入りは端末に保存し、次回訪問時も維持する
   const [sortKey, setSortKey] = useLocalStorageState<SortKey>("hm:sortKey", "price");
@@ -71,7 +91,24 @@ export default function Dashboard({ data: initialData }: Props) {
       favorites.includes(name) ? favorites.filter((f) => f !== name) : [...favorites, name]
     );
 
+  const closeSheet = useCallback(() => setSelectedItem(null), []);
+
   const toggleAccordion = (idx: number) => setOpenAccordion((prev) => (prev === idx ? null : idx));
+
+  const summary = useMemo(() => buildSummary(data, longJa(today)), [data, today]);
+
+  // 流れる帯: 今日の特売を値引きの大きい順に
+  const tickerItems = useMemo(
+    () =>
+      [
+        ...data.general.filter((g) => g.day === "today"),
+        ...data.highlights.filter((h) => h.day === "today"),
+      ]
+        .filter((g, i, all) => all.findIndex((x) => x.name === g.name && x.shop === g.shop) === i)
+        .sort((a, b) => discountRate(b) - discountRate(a))
+        .slice(0, 24),
+    [data.general, data.highlights]
+  );
 
   const filteredHighlights = useMemo(
     // 今週タブでは目玉品は今日・明日分をまとめて表示する
@@ -142,13 +179,6 @@ export default function Dashboard({ data: initialData }: Props) {
     availableCategories,
   ]);
 
-  const tabCls = (active: boolean) =>
-    `flex-1 py-3.5 font-bold rounded-2xl text-center text-[13px] transition-all duration-200 ${
-      active
-        ? "bg-rose-500 text-white shadow-md shadow-rose-200"
-        : "bg-stone-100 text-stone-600 hover:bg-stone-200"
-    }`;
-
   const formattedStocks = useMemo<StockGroup[]>(() => {
     const groups: Record<string, StockGroup["items"]> = {};
     data.stocks.forEach((s) => {
@@ -208,24 +238,55 @@ export default function Dashboard({ data: initialData }: Props) {
     [formattedStocks, effectiveStockCats]
   );
 
-  // 検索エンジン向けの構造化データ。
-  // - WebSite: サイト名の認識（検索結果のサイト名表示）を安定させる
-  // - ItemList: 掲載中の特売品（Yahoo照合済みの商品は実写画像も添える）
+  // 検索エンジン・AI 検索向けの構造化データ。いずれもページに表示している内容と一致させる
   const jsonLd = useMemo(() => {
     const products = [...initialData.highlights, ...initialData.general].slice(0, 10);
+    const org = {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#org`,
+      name: SITE_NAME,
+      url: `${SITE_URL}/`,
+      logo: `${SITE_URL}/icons/icon-512.png`,
+      ...(CONTACT_EMAIL ? { email: CONTACT_EMAIL } : {}),
+    };
     return [
+      { "@context": "https://schema.org", ...org },
       {
         "@context": "https://schema.org",
         "@type": "WebSite",
+        "@id": `${SITE_URL}/#website`,
         name: SITE_NAME,
         alternateName: SITE_TITLE,
         url: `${SITE_URL}/`,
         description: SITE_DESCRIPTION,
         inLanguage: "ja",
+        publisher: { "@id": `${SITE_URL}/#org` },
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        name: SITE_TITLE,
+        url: `${SITE_URL}/`,
+        description: SITE_DESCRIPTION,
+        inLanguage: "ja",
+        dateModified: builtOn,
+        isPartOf: { "@id": `${SITE_URL}/#website` },
+        about: {
+          "@type": "Place",
+          name: "大阪府豊中市 庄内・服部エリア",
+          address: {
+            "@type": "PostalAddress",
+            addressRegion: "大阪府",
+            addressLocality: "豊中市",
+            addressCountry: "JP",
+          },
+        },
+        mainEntity: { "@id": `${SITE_URL}/#deals` },
       },
       {
         "@context": "https://schema.org",
         "@type": "ItemList",
+        "@id": `${SITE_URL}/#deals`,
         name: SITE_TITLE,
         description: SITE_DESCRIPTION,
         itemListElement: products.map((p, i) => ({
@@ -246,29 +307,19 @@ export default function Dashboard({ data: initialData }: Props) {
           },
         })),
       },
+      FAQ_JSONLD,
     ];
-  }, [initialData]);
+  }, [initialData, builtOn]);
 
-  const todayDate = new Date();
-  const tomorrowDate = new Date(todayDate);
-  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-  const weekEndDate = new Date(todayDate);
-  weekEndDate.setDate(weekEndDate.getDate() + 6);
-  const formatDate = (d: Date) => `${d.getMonth() + 1}/${d.getDate()}`;
-  const todayStr = formatDate(todayDate);
-  const tomorrowStr = formatDate(tomorrowDate);
-  const weekEndStr = formatDate(weekEndDate);
+  const dayTabs = <DayTabs value={currentTab} onChange={setCurrentTab} today={today} />;
+  const dayName = currentTab === "today" ? "今日" : currentTab === "tomorrow" ? "明日" : "今週";
 
   return (
-    <div className="bg-[#f5f4f1] font-sans antialiased text-stone-800 min-h-screen">
+    <>
       <Head>
         <title>{SITE_TITLE}</title>
         <meta name="description" content={SITE_DESCRIPTION} />
         <link rel="canonical" href={`${SITE_URL}/`} />
-        <meta name="theme-color" content="#e11d48" />
-        <link rel="manifest" href="/manifest.webmanifest" />
-        <link rel="icon" href="/icons/icon-192.png" type="image/png" />
-        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-title" content="北摂マルシェ" />
         <meta property="og:type" content="website" />
@@ -289,59 +340,112 @@ export default function Dashboard({ data: initialData }: Props) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </Head>
-      <style>{`.no-sb::-webkit-scrollbar{display:none}.no-sb{-ms-overflow-style:none;scrollbar-width:none}`}</style>
 
-      <div className="max-w-md mx-auto bg-[#faf9f8] min-h-screen pb-12 shadow-xl relative">
-        {/* ヒーローバナー（自前のイラストSVG） */}
-        <HeroBanner />
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-full focus:bg-ink focus:px-4 focus:py-2 focus:text-paper"
+      >
+        本文へ移動
+      </a>
+      <SiteHeader updated={data.lastUpdated} onTop />
 
-        <header className="bg-white/70 backdrop-blur-xl border-b border-stone-200 sticky top-0 z-50 p-4 pb-3 pt-4 -mt-16 rounded-t-3xl">
-          <div className="flex justify-between items-center mb-2">
-            <h1 className="flex items-center gap-2 text-base font-black text-stone-800 tracking-tight drop-shadow-sm">
-              <BrandMark className="w-7 h-7" /> 北摂マルシェ
-            </h1>
-            <span className="text-[10px] bg-white/80 text-stone-600 px-2.5 py-1 rounded-full font-bold shadow-sm border border-stone-100">
-              本日 {data.lastUpdated} 更新
-            </span>
-          </div>
-          <p className="text-[10px] text-stone-600 font-medium leading-relaxed">
-            豊南エリアのスーパー（ライフ・ダイエー・サタケ・万代など）のチラシ情報をAIが毎日集約！いつ・どこで買うのが一番お得か、一目でわかります。
-          </p>
-        </header>
+      <main id="main">
+        <Hero
+          summary={summary}
+          dateLong={longJa(today)}
+          weekEn={weekEn(today)}
+          updated={data.lastUpdated}
+          onOpen={setSelectedItem}
+        />
+        <Ticker items={tickerItems} />
 
-        <main className="p-4 space-y-6">
-          <section className="bg-white p-4 rounded-3xl shadow-sm border border-stone-100">
-            <SectionHeading
-              variant="calendar"
-              title="毎日の必需品 1週間底値カレンダー"
-              tint="text-teal-700"
-              chipBg="from-teal-400 to-emerald-400"
+        {/* 01 底値カレンダー */}
+        <section id="calendar" aria-labelledby="calendar-title" className={SECTION}>
+          <SectionHead
+            id="calendar-title"
+            index="01"
+            kicker="Bottom price calendar"
+            eyebrow="毎日の必需品"
+            title="1週間底値カレンダー"
+            lead="卵・牛乳・食パンなどの定番品が、今週いつ・どの店で一番安いか。柿色の札が今週の底値です。日付のマスを押すと、その日の詳細が開きます。"
+          />
+          {dailyOptions.length > 0 && (
+            <SectionPicker
+              label="表示する品目を選ぶ"
+              options={dailyOptions}
+              selected={effectiveDailyPicks.filter((n) => dailyOptions.includes(n))}
+              onChange={setDailyPicks}
             />
-            {dailyOptions.length > 0 && (
-              <SectionPicker
-                label="表示する品目を選ぶ"
-                options={dailyOptions}
-                selected={effectiveDailyPicks.filter((n) => dailyOptions.includes(n))}
-                onChange={setDailyPicks}
-              />
+          )}
+          <div className="border-t-2 rule-strong">
+            {visibleDaily.length > 0 ? (
+              visibleDaily.map((item, i) => (
+                <DailyCarouselItem
+                  key={item.name}
+                  item={item}
+                  index={i}
+                  onClick={setSelectedItem}
+                />
+              ))
+            ) : (
+              <p className="py-12 text-center text-[13px] text-ink-mute">
+                {data.daily.length > 0
+                  ? "表示する品目が選ばれていません。右上の「表示する品目を選ぶ」から選択できます。"
+                  : "データがありません"}
+              </p>
             )}
-            <div className="space-y-4">
-              {visibleDaily.length > 0 ? (
-                visibleDaily.map((item, i) => (
-                  <DailyCarouselItem key={i} item={item} onClick={setSelectedItem} />
-                ))
-              ) : data.daily.length > 0 ? (
-                <p className="text-[11px] text-stone-400 text-center py-4">
-                  表示する品目が選ばれていません。右上の「表示する品目を選ぶ」から選択できます。
-                </p>
-              ) : (
-                <p className="text-xs text-stone-500 text-center py-4">データがありません</p>
-              )}
-            </div>
-          </section>
+          </div>
+        </section>
 
+        <div className="mx-auto max-w-page px-4 sm:px-6 lg:px-10">
           <AdUnit slot={ADSENSE_SLOT_TOP} />
+        </div>
 
+        {/* 02 目玉品 */}
+        <section id="picks" aria-labelledby="picks-title" className={SECTION}>
+          <SectionHead
+            id="picks-title"
+            index="02"
+            kicker="Today's highlights"
+            eyebrow="見落とし厳禁！"
+            title="エリア最高目玉品"
+            lead="ふだんの平均価格から大きく下がった、今日・明日だけの目玉品。"
+            aside={dayTabs}
+          />
+          {filteredHighlights.length > 0 ? (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredHighlights.map((h, i) => (
+                <HighlightCard
+                  key={`${h.name}-${h.shop}-${i}`}
+                  h={h}
+                  index={i}
+                  onClick={setSelectedItem}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="rounded-[22px] border border-dashed border-ink/25 py-12 text-center text-[13px] text-ink-mute">
+              {dayName}の目玉品はありません
+            </p>
+          )}
+        </section>
+
+        {/* 03 ストック */}
+        <section id="stock" aria-labelledby="stock-title" className={SECTION}>
+          <SectionHead
+            id="stock-title"
+            index="03"
+            kicker="Stock up"
+            eyebrow="日持ちする品は、安い週に"
+            title={
+              <>
+                ストック・
+                <wbr />
+                まとめ買いのチャンス
+              </>
+            }
+            lead="お米・調味料・飲料・お酒など、買い溜めに向く品をカテゴリごとに。"
+          />
           <StockAccordion
             stocks={visibleStocks}
             openIdx={openAccordion}
@@ -361,61 +465,19 @@ export default function Dashboard({ data: initialData }: Props) {
               />
             }
           />
+        </section>
 
-          <div className="flex gap-1.5 bg-stone-100/50 p-1 rounded-3xl">
-            <button
-              onClick={() => setCurrentTab("today")}
-              aria-pressed={currentTab === "today"}
-              className={tabCls(currentTab === "today")}
-            >
-              今日
-              <span className="block text-[9px] font-medium opacity-80 leading-none mt-0.5">
-                {todayStr}
-              </span>
-            </button>
-            <button
-              onClick={() => setCurrentTab("tomorrow")}
-              aria-pressed={currentTab === "tomorrow"}
-              className={tabCls(currentTab === "tomorrow")}
-            >
-              明日
-              <span className="block text-[9px] font-medium opacity-80 leading-none mt-0.5">
-                {tomorrowStr}
-              </span>
-            </button>
-            <button
-              onClick={() => setCurrentTab("week")}
-              aria-pressed={currentTab === "week"}
-              className={tabCls(currentTab === "week")}
-            >
-              今週
-              <span className="block text-[9px] font-medium opacity-80 leading-none mt-0.5">
-                〜{weekEndStr}
-              </span>
-            </button>
-          </div>
-
-          <section className="bg-gradient-to-br from-amber-50 to-orange-50/50 p-4 rounded-3xl border border-orange-100 shadow-sm">
-            <SectionHeading
-              variant="flame"
-              title="見落とし厳禁！エリア最高目玉品"
-              tint="text-orange-600"
-              chipBg="from-orange-400 to-rose-400"
-            />
-            <div className="space-y-3">
-              {filteredHighlights.length > 0 ? (
-                filteredHighlights.map((h, i) => (
-                  <HighlightCard key={i} h={h} onClick={setSelectedItem} />
-                ))
-              ) : (
-                <p className="text-[11px] text-orange-500 text-center py-3 bg-white/50 rounded-xl">
-                  {currentTab === "today" ? "今日" : currentTab === "tomorrow" ? "明日" : "今週"}
-                  の目玉品はありません
-                </p>
-              )}
-            </div>
-          </section>
-
+        {/* 04 総合リスト */}
+        <section id="list" aria-labelledby="list-title" className={SECTION}>
+          <SectionHead
+            id="list-title"
+            index="04"
+            kicker="All deals"
+            eyebrow={`${dayName}の特売をすべて`}
+            title="総合特売リスト"
+            lead="商品名で探す・店やジャンルで絞る・安い順に並べる。☆を押すとお気に入りとして先頭に固定されます。"
+            aside={dayTabs}
+          />
           <GeneralTable
             items={filteredGeneral}
             searchQuery={searchQuery}
@@ -435,16 +497,48 @@ export default function Dashboard({ data: initialData }: Props) {
             onToggleFavorite={toggleFavorite}
             onClick={setSelectedItem}
           />
+        </section>
 
+        <div className="mx-auto max-w-page px-4 sm:px-6 lg:px-10">
           <AdUnit slot={ADSENSE_SLOT_BOTTOM} />
-        </main>
+        </div>
 
-        <SiteFooter />
-      </div>
+        {/* 05 店舗 */}
+        <section id="stores" aria-labelledby="stores-title" className={SECTION}>
+          <SectionHead
+            id="stores-title"
+            index="05"
+            kicker="Stores"
+            eyebrow="お近くの店から"
+            title="店舗から探す"
+            lead="豊中市 庄内・服部エリアの対象スーパーとドラッグストア。店ごとの特売一覧と、公式チラシへのリンクをまとめています。"
+          />
+          <StoreDirectory general={data.general} />
+        </section>
 
-      {/* ボトムシートの呼び出し */}
-      <BottomSheet item={selectedItem} onClose={() => setSelectedItem(null)} />
-    </div>
+        {/* 06 しくみ */}
+        <section id="how" aria-labelledby="how-title" className={SECTION}>
+          <SectionHead
+            id="how-title"
+            index="06"
+            kicker="How it works"
+            title="毎朝の紙面ができるまで"
+          />
+          <HowItWorks />
+        </section>
+
+        {/* 07 よくある質問 */}
+        <section id="faq" aria-labelledby="faq-title" className={SECTION}>
+          <SectionHead id="faq-title" index="07" kicker="FAQ" title="よくある質問" />
+          <FaqList />
+        </section>
+      </main>
+
+      <SiteFooter />
+
+      {/* 詳細シート */}
+      <BottomSheet item={selectedItem} onClose={closeSheet} />
+    </>
   );
 }
 
@@ -466,6 +560,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   return {
     props: {
       data: data || SAMPLE_DATA,
+      builtOn: isoDate(jstToday()),
     },
   };
 };

@@ -7,6 +7,7 @@ export default function About() {
       title="運営者情報・お問い合わせ"
       description="北摂マルシェの運営方針、サイトの目的、お問い合わせ方法についてのご案内です。"
       path="/about"
+      kicker="About"
     >
       <h2>当サイトについて</h2>
       <p>

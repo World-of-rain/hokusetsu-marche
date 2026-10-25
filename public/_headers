@@ -12,6 +12,10 @@
 /sw.js
   Cache-Control: no-cache
 
+# ビルドの成果物（ファイル名にハッシュが入る JS・CSS・フォント）は1年キャッシュ
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable
+
 # アイコン・OG画像は長期キャッシュ
 /icons/*
   Cache-Control: public, max-age=604800

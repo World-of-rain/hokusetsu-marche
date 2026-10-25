@@ -2,4 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /api/
 
+# AI 向けのサイト案内: https://www.hokusetsu-marche.com/llms.txt
+
 Sitemap: https://www.hokusetsu-marche.com/sitemap.xml

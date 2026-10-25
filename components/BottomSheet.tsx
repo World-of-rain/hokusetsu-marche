@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import ProductImage from "./ProductImage";
 import Glyph from "./Glyph";
 import PriceSparkline from "./PriceSparkline";
+import Yen from "./Yen";
 import { getStoreUrl } from "../lib/storeLinks";
 import { REPORT_REASONS, submitReport, type ReportReason } from "../lib/report";
 import type { SelectedItem } from "../lib/types";
@@ -141,7 +142,7 @@ export default function BottomSheet({ item, onClose }: Props) {
     <>
       {/* 背景のオーバーレイ */}
       <div
-        className="fixed inset-0 bg-black/40 z-[100] transition-opacity"
+        className="fade-in fixed inset-0 z-[100] bg-ink/45 backdrop-blur-[2px]"
         onClick={onClose}
         aria-hidden="true"
       ></div>
@@ -160,12 +161,15 @@ export default function BottomSheet({ item, onClose }: Props) {
           transform: dragY ? `translateY(${dragY}px)` : undefined,
           transition: dragging ? "none" : "transform 0.25s ease",
         }}
-        className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl z-[101] shadow-2xl max-w-md mx-auto max-h-[88dvh] flex flex-col"
+        className="sheet-in fixed bottom-0 left-0 right-0 z-[101] mx-auto flex max-h-[90dvh] max-w-lg flex-col rounded-t-[28px] border border-ink/20 bg-paper shadow-lift md:bottom-0 md:top-0 md:my-auto md:h-fit md:max-h-[86dvh] md:rounded-[28px]"
       >
         {/* 常に表示されるヘッダー兼ドラッグゾーン（ここを下スワイプすればいつでも閉じる） */}
-        <div className="flex-shrink-0 px-4 pt-3 pb-2 cursor-grab" style={{ touchAction: "none" }}>
+        <div
+          className="flex-shrink-0 cursor-grab px-5 pb-3 pt-3 md:px-7 md:pt-7"
+          style={{ touchAction: "none" }}
+        >
           {/* ドラッグハンドル（下スワイプで閉じられる目印） */}
-          <div className="w-10 h-1.5 bg-stone-300 rounded-full mx-auto mb-3"></div>
+          <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-ink/20 md:hidden"></div>
 
           <div className="flex gap-3 items-center">
             <ProductImage
@@ -174,21 +178,19 @@ export default function BottomSheet({ item, onClose }: Props) {
               icon={item.icon}
               photoUrl={item.photo_url}
               width={200}
-              className="w-14 h-14 rounded-2xl shadow-sm flex-shrink-0"
+              className="h-16 w-16 flex-shrink-0 rounded-2xl border rule"
             />
             <div className="min-w-0">
-              <h3 className="font-black text-stone-800 text-base leading-tight truncate">
-                {item.name}
-              </h3>
+              <h3 className="font-display text-[1.6rem] leading-tight text-ink">{item.name}</h3>
               {item.raw_item_name && item.raw_item_name !== item.name && (
-                <p className="text-stone-400 text-[10px] leading-tight mt-0.5 line-clamp-2">
+                <p className="mt-1 line-clamp-2 text-[11px] leading-tight text-ink-mute">
                   {item.raw_item_name}
                 </p>
               )}
-              <p className="text-stone-600 text-xs mt-0.5">
+              <p className="mt-1 text-[13px] font-bold text-ink-soft">
                 {item.shop}
                 {item.slot_day && (
-                  <span className="ml-1.5 bg-stone-100 text-stone-600 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                  <span className="ml-2 rounded-full bg-ink px-2 py-0.5 text-[10px] font-bold text-paper">
                     {item.slot_day}
                   </span>
                 )}
@@ -200,56 +202,51 @@ export default function BottomSheet({ item, onClose }: Props) {
         {/* スクロールする本文 */}
         <div
           ref={bodyRef}
-          className="flex-1 min-h-0 overflow-y-auto px-4 pb-6"
+          className="min-h-0 flex-1 overflow-y-auto px-5 pb-7 md:px-7"
           style={{ touchAction: "pan-y", overscrollBehavior: "contain" }}
         >
           {/* 通報の状態（ユーザーへの結果表示） */}
           {item.report_state === "checking" && (
-            <div className="flex gap-2 items-center text-[11px] text-amber-800 bg-amber-50 border border-amber-100 p-2 rounded-xl mb-3">
-              <Glyph name="clock" className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+            <div className="mb-3 flex items-center gap-2 rounded-2xl border border-mustard/50 bg-mustard-tint p-3 text-[12px] text-ink">
+              <Glyph name="clock" className="h-3.5 w-3.5 flex-shrink-0" />
               この商品情報にはユーザーからの報告があり、確認中です。
             </div>
           )}
           {item.report_state === "fixed" && (
-            <div className="flex gap-2 items-center text-[11px] text-teal-800 bg-teal-50 border border-teal-100 p-2 rounded-xl mb-3">
-              <Glyph name="sparkle" className="w-3.5 h-3.5 text-teal-500 flex-shrink-0" />
+            <div className="mb-3 flex items-center gap-2 rounded-2xl bg-leaf-tint p-3 text-[12px] text-leaf-deep">
+              <Glyph name="sparkle" className="h-3.5 w-3.5 flex-shrink-0" />
               ユーザーからの報告を受けて、この商品情報は修正済みです。
             </div>
           )}
 
-          <div className="bg-[#faf9f8] rounded-2xl p-3 mb-3 border border-stone-100">
+          <div className="mb-4 rounded-[20px] border border-ink/15 bg-paper-light p-4">
             <div className="flex justify-between items-end mb-1.5">
-              <span className="text-stone-600 text-xs font-bold">特売価格</span>
+              <span className="text-[12px] font-bold tracking-[0.12em] text-ink-mute">
+                特売価格
+              </span>
               <div className="text-right">
-                <div className="flex items-baseline gap-1 justify-end">
-                  <span className="text-2xl font-black text-rose-600 leading-none">
-                    {item.price}
-                  </span>
-                  <span className="text-rose-600 font-bold text-sm">円</span>
-                </div>
+                <Yen value={item.price} className="text-[3.2rem] leading-none text-persimmon" />
                 {item.unit_price_text && (
-                  <div className="text-[10px] text-stone-500 font-medium mt-0.5">
-                    （{item.unit_price_text}）
-                  </div>
+                  <div className="mt-1 text-[11px] text-ink-mute">（{item.unit_price_text}）</div>
                 )}
               </div>
             </div>
 
             {avgPrice > 0 && (
-              <div className="flex justify-between items-center py-1.5 border-t border-stone-200/60 border-dashed">
-                <span className="text-stone-600 text-[11px]">過去の平均価格</span>
-                <span className="text-stone-700 text-xs font-bold">{avgPrice}円</span>
+              <div className="flex items-center justify-between border-t border-dashed border-ink/20 py-2">
+                <span className="text-[12px] text-ink-soft">過去の平均価格</span>
+                <span className="num text-lg text-ink">{avgPrice}円</span>
               </div>
             )}
             {minPrice > 0 && (
-              <div className="flex justify-between items-center py-1.5 border-t border-stone-200/60 border-dashed">
-                <span className="text-stone-600 text-[11px]">過去最安値</span>
-                <span className="text-stone-700 text-xs font-bold">{minPrice}円</span>
+              <div className="flex items-center justify-between border-t border-dashed border-ink/20 py-2">
+                <span className="text-[12px] text-ink-soft">過去最安値</span>
+                <span className="num text-lg text-ink">{minPrice}円</span>
               </div>
             )}
 
             {discountRate > 0 && (
-              <div className="mt-1.5 bg-rose-100 text-rose-700 text-xs font-bold text-center py-1.5 rounded-xl flex items-center justify-center gap-1">
+              <div className="mt-2 flex items-center justify-center gap-1.5 rounded-full bg-leaf py-2 text-[13px] font-bold text-white">
                 <Glyph name="sparkle" className="w-3.5 h-3.5" />
                 平均より {discountRate}% お得！
               </div>
@@ -258,8 +255,8 @@ export default function BottomSheet({ item, onClose }: Props) {
 
           {/* この日に複数店舗で特売がある場合は全店舗を表示 */}
           {item.offers && item.offers.length > 1 && (
-            <div className="bg-white rounded-2xl p-3 mb-3 border border-stone-100">
-              <div className="text-stone-600 text-[11px] font-bold mb-1.5">
+            <div className="mb-4 rounded-[20px] border border-ink/15 p-4">
+              <div className="mb-2 text-[12px] font-bold tracking-[0.08em] text-ink-mute">
                 {item.slot_day ? `${item.slot_day}の取扱店` : "この日の取扱店"}
               </div>
               <div className="space-y-1">
@@ -268,12 +265,12 @@ export default function BottomSheet({ item, onClose }: Props) {
                   .map((o, oi) => (
                     <div
                       key={oi}
-                      className="flex items-start justify-between text-xs py-1.5 border-b border-stone-50 last:border-0 gap-2"
+                      className="flex items-start justify-between gap-2 border-b border-dashed border-ink/15 py-2 text-xs last:border-0"
                     >
                       <div className="min-w-0 flex-1">
-                        <div className="text-stone-700 font-medium truncate">{o.shop}</div>
+                        <div className="truncate text-[13px] font-bold text-ink">{o.shop}</div>
                         {o.raw_item_name && (
-                          <div className="text-stone-400 text-[10px] leading-tight line-clamp-2 mt-0.5">
+                          <div className="mt-0.5 line-clamp-2 text-[11px] leading-tight text-ink-mute">
                             {o.raw_item_name}
                           </div>
                         )}
@@ -283,7 +280,7 @@ export default function BottomSheet({ item, onClose }: Props) {
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="inline-flex items-center gap-0.5 text-rose-500 text-[10px] font-bold mt-0.5 active:opacity-60"
+                            className="mt-1 inline-flex items-center gap-1 text-[11px] font-bold text-persimmon underline-offset-2 hover:underline"
                           >
                             <Glyph name="store" className="w-3 h-3" />
                             チラシを見る ↗
@@ -292,15 +289,15 @@ export default function BottomSheet({ item, onClose }: Props) {
                       </div>
                       <div className="text-right whitespace-nowrap flex-shrink-0">
                         <span
-                          className={`font-black ${
-                            o.price === item.price ? "text-rose-600" : "text-stone-500"
+                          className={`num text-xl ${
+                            o.price === item.price ? "text-persimmon" : "text-ink-soft"
                           }`}
                         >
                           {o.price}円
                         </span>
                         {o.bonus_points > 0 && (
                           <div className="mt-0.5">
-                            <span className="bg-violet-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
+                            <span className="rounded-full bg-plum px-1.5 py-0.5 text-[9px] font-bold text-white">
                               +{o.bonus_points}pt
                             </span>
                           </div>
@@ -317,22 +314,20 @@ export default function BottomSheet({ item, onClose }: Props) {
 
           <div className="space-y-2.5">
             {item.purchase_condition && (
-              <div className="flex gap-2 items-start bg-amber-50 p-2.5 rounded-xl border border-amber-100">
-                <span className="text-amber-500 mt-0.5">
+              <div className="flex items-start gap-2.5 rounded-2xl border border-mustard/50 bg-mustard-tint p-3">
+                <span className="mt-0.5 text-ink">
                   <Glyph name="warning" className="w-4 h-4" />
                 </span>
                 <div>
-                  <div className="text-[10px] font-bold text-amber-700 mb-0.5">購入条件・備考</div>
-                  <div className="text-xs text-amber-900 font-medium">
-                    {item.purchase_condition}
-                  </div>
+                  <div className="mb-0.5 text-[11px] font-bold text-ink-soft">購入条件・備考</div>
+                  <div className="text-[13px] font-bold text-ink">{item.purchase_condition}</div>
                 </div>
               </div>
             )}
 
             {(item.sale_start_date || item.sale_end_date) && (
-              <div className="flex gap-2 items-center text-xs text-stone-600 bg-stone-50 p-2.5 rounded-xl">
-                <span className="text-stone-400">
+              <div className="flex items-center gap-2.5 rounded-2xl border border-ink/10 bg-paper-light p-3 text-[13px] text-ink-soft">
+                <span className="text-ink-mute">
                   <Glyph name="calendar" className="w-4 h-4" />
                 </span>
                 <span className="font-medium">
@@ -349,8 +344,8 @@ export default function BottomSheet({ item, onClose }: Props) {
             )}
 
             {item.comment && (
-              <div className="flex gap-2 items-start text-xs text-teal-800 bg-teal-50 p-2.5 rounded-xl">
-                <span className="text-teal-500 mt-0.5">
+              <div className="flex items-start gap-2.5 rounded-2xl bg-leaf-tint p-3 text-[13px] text-leaf-deep">
+                <span className="mt-0.5 text-leaf">
                   <Glyph name="bulb" className="w-4 h-4" />
                 </span>
                 <span className="font-medium leading-relaxed">{item.comment}</span>
@@ -364,9 +359,9 @@ export default function BottomSheet({ item, onClose }: Props) {
                 href={storeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-1.5 w-full bg-white border-2 border-stone-200 text-stone-700 font-bold py-2.5 rounded-2xl active:bg-stone-100 transition-colors text-sm"
+                className="flex w-full items-center justify-center gap-1.5 rounded-full border border-ink py-3 text-sm font-bold text-ink transition-colors hover:bg-ink hover:text-paper"
               >
-                <Glyph name="store" className="w-4 h-4 text-rose-500" />
+                <Glyph name="store" className="h-4 w-4" />
                 {item.shop} のチラシを見る ↗
               </a>
             )}
@@ -375,12 +370,12 @@ export default function BottomSheet({ item, onClose }: Props) {
                 href={item.product_url}
                 target="_blank"
                 rel="noopener noreferrer sponsored"
-                className="flex flex-col items-center justify-center w-full bg-white border border-stone-200 text-stone-500 py-2 rounded-2xl active:bg-stone-100 transition-colors"
+                className="flex w-full flex-col items-center justify-center rounded-full border border-ink/20 py-2.5 text-ink-soft transition-colors hover:border-ink"
               >
-                <span className="text-[11px] font-bold text-stone-600">
+                <span className="text-[12px] font-bold text-ink">
                   Yahoo!ショッピングで商品を見る ↗
                 </span>
-                <span className="text-[9px] text-stone-400 mt-0.5">
+                <span className="mt-0.5 text-[10px] text-ink-mute">
                   商品画像・情報: Yahoo!ショッピング
                   {item.jan_code ? ` / JAN ${item.jan_code}` : ""}
                 </span>
@@ -389,44 +384,44 @@ export default function BottomSheet({ item, onClose }: Props) {
             <button
               ref={closeButtonRef}
               onClick={onClose}
-              className="w-full bg-stone-800 text-white font-bold py-3 rounded-2xl active:bg-stone-700 transition-colors"
+              className="w-full rounded-full bg-ink py-3.5 font-bold text-paper transition-colors hover:bg-persimmon"
             >
               閉じる
             </button>
           </div>
 
           {/* 情報の誤り通報（理由を選ぶだけの軽い導線） */}
-          <div className="mt-3 pt-3 border-t border-stone-100">
+          <div className="mt-4 border-t rule pt-4">
             {reportStatus === "done" ? (
-              <p className="flex items-center justify-center gap-1 text-[11px] text-teal-600 font-bold py-1">
+              <p className="flex items-center justify-center gap-1 py-1 text-[12px] font-bold text-leaf">
                 <Glyph name="sparkle" className="w-3.5 h-3.5" />
                 ご報告ありがとうございます。確認して修正します。
               </p>
             ) : item.report_state === "checking" ? (
-              <p className="text-[11px] text-stone-400 text-center py-1">
+              <p className="py-1 text-center text-[12px] text-ink-mute">
                 この商品への報告はすでに受付済みで、確認中です。
               </p>
             ) : !reportOpen ? (
               <button
                 onClick={() => setReportOpen(true)}
-                className="flex items-center justify-center gap-1 w-full text-[11px] text-stone-400 hover:text-stone-600 font-medium py-1"
+                className="flex w-full items-center justify-center gap-1 py-1 text-[12px] text-ink-mute hover:text-ink"
               >
                 <Glyph name="warning" className="w-3 h-3" />
                 この商品の情報が違う場合は報告する
               </button>
             ) : (
               <div className="space-y-2">
-                <p className="text-[11px] font-bold text-stone-600">どこが違いますか？</p>
+                <p className="text-[13px] font-bold text-ink">どこが違いますか？</p>
                 <div className="flex flex-wrap gap-1.5">
                   {REPORT_REASONS.map((r) => (
                     <button
                       key={r.code}
                       onClick={() => setReportReason(r.code)}
                       aria-pressed={reportReason === r.code}
-                      className={`text-[11px] font-bold px-2.5 py-1 rounded-full border transition-colors ${
+                      className={`rounded-full border px-3 py-1.5 text-[12px] font-bold transition-colors ${
                         reportReason === r.code
-                          ? "bg-rose-500 text-white border-rose-500"
-                          : "bg-white text-stone-600 border-stone-200"
+                          ? "border-persimmon bg-persimmon text-white"
+                          : "border-ink/20 text-ink-soft hover:border-ink"
                       }`}
                     >
                       {r.label}
@@ -440,25 +435,25 @@ export default function BottomSheet({ item, onClose }: Props) {
                   rows={2}
                   placeholder="補足があれば（任意）"
                   aria-label="補足（任意）"
-                  className="w-full text-xs border border-stone-200 rounded-xl p-2 focus:outline-none focus:border-rose-400 resize-none"
+                  className="w-full resize-none rounded-2xl border border-ink/20 bg-paper-light p-3 text-[13px] focus:border-ink focus:outline-none"
                 />
                 <div className="flex gap-2">
                   <button
                     onClick={() => setReportOpen(false)}
-                    className="flex-1 text-[11px] font-bold text-stone-500 py-2 rounded-xl bg-stone-100 active:bg-stone-200"
+                    className="flex-1 rounded-full border border-ink/20 py-2.5 text-[12px] font-bold text-ink-soft hover:border-ink"
                   >
                     やめる
                   </button>
                   <button
                     onClick={handleSubmitReport}
                     disabled={!reportReason || reportStatus === "sending"}
-                    className="flex-1 text-[11px] font-bold text-white py-2 rounded-xl bg-rose-500 active:bg-rose-600 disabled:opacity-40"
+                    className="flex-1 rounded-full bg-persimmon py-2.5 text-[12px] font-bold text-white hover:bg-persimmon-deep disabled:opacity-40"
                   >
                     {reportStatus === "sending" ? "送信中…" : "報告する"}
                   </button>
                 </div>
                 {reportStatus === "error" && (
-                  <p className="text-[10px] text-rose-500 text-center">
+                  <p className="text-center text-[11px] text-persimmon">
                     送信に失敗しました。時間をおいて再度お試しください。
                   </p>
                 )}

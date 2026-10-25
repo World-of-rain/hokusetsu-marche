@@ -55,7 +55,24 @@ KV へは NAS 側が抽出完了ごと・毎朝5時に書き込むので、**デ
 
 ### 画面
 
-ほぼ全体が `pages/index.tsx` の1ページ（底値カレンダー `daily`・ストック品 `stocks`・目玉品 `highlights`・総合リスト `general` の4セクション）。`about` / `guide` / `privacy` は `components/DocPage.tsx` を使う静的文書ページ。表示設定などの端末ごとの保存は `lib/useLocalStorage.ts`。
+- `pages/index.tsx` … トップ（「まちの朝市新聞」の紙面）。ヒーロー（大見出し・本日のまとめ・今日の一押しの値札・数字の柱）→ 流れる帯 → 01 底値カレンダー `daily` → 02 目玉品 `highlights` → 03 ストック `stocks` → 04 総合リスト `general` → 05 店舗の索引 → 06 しくみ → 07 よくある質問。「今日・明日・今週」の切り替え（`DayTabs`）は 02 と 04 に同じ状態で2つ置く
+- `pages/stores/[slug].tsx` … 店舗別ページ（`lib/storeLinks.ts` の `slug`）。その店の底値・目玉品・日別の特売一覧。ビルド時のデータで書き出し、表示後に KV の最新データへ差し替える。店舗を足すときは `STORE_LINKS` と `scripts/gen-sitemap.mjs` の `STORE_SLUGS` の両方に足す
+- `about` / `guide` / `privacy` は `components/DocPage.tsx`、見つからないページは `pages/404.tsx`
+- 表示設定などの端末ごとの保存は `lib/useLocalStorage.ts`
+
+### デザインの決まり
+
+- 色は `tailwind.config.js` のトークン（`paper` 紙・`ink` 墨・`persimmon` 柿・`leaf` 若葉・`mustard` 芥子・`plum`）だけを使う。柿色は白抜き・地の上の小さな文字のどちらでも 4.5:1 以上になる深さにしてある（変えるときはコントラスト比を計算する）
+- フォントは `lib/fonts.ts`（next/font の自己ホスト）。取り込むのは見出しの明朝（`font-display`）と数字の欧文（`.num`）だけ。本文は端末のゴシック。日本語の本文フォントを取り込むと、分割ファイルが届くたびの組み直しで低速の端末の描画が数秒遅れた（Lighthouse スマホ 67 → 外して 98）
+- スクロールで現れる演出は `data-reveal`（`lib/useReveal.ts`）。`.js` クラスがあるときだけ効き、JS が動かない環境（クローラ）や動きを減らす設定では最初から見える。書き出した HTML に中身が必ず入るようにする
+- 価格は `components/Yen.tsx`（数字は `.num`、「円」は小さく）
+
+### SEO・AI 検索（SAO）
+
+- 構造化データ: トップは Organization / WebSite / WebPage / ItemList / FAQPage、店舗ページは BreadcrumbList / GroceryStore（等）/ ItemList、読み物は BreadcrumbList（ガイドは FAQPage も）。**いずれもページに表示している内容と一致させる**
+- よくある質問は `lib/faq.ts` の1か所から、トップ・ガイドの表示と FAQPage の両方を作る
+- 本日のまとめ（`lib/summary.ts`）は自然文でページ本文に書き出す。JS を動かさない AI クローラもそのまま引用できる
+- `public/llms.txt` … AI 向けのサイト案内（ページと店舗の一覧・引用時の注意）。店舗を足したらここにも足す
 
 ### 環境変数
 
